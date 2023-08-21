@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/knuxify/SerialBowl">
+    <file>ui/settings-pane.ui</file>
+    <file>ui/window.ui</file>
+    <file>style.css</file>
+  </gresource>
+</gresources>

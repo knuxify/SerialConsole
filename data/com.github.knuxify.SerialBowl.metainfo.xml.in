@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <!-- TRANSLATORS: Do not translate or transliterate the name of the program (Serial Bowl). For this string, just copy the existing contents, -->
+  <name>Serial Bowl</name>
+  <!-- TRANSLATORS: App description. -->
+  <summary>Access any serial console</summary>
+  <id>com.github.knuxify.SerialBowl</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+
+  <launchable type="desktop-id">com.github.knuxify.SerialBowl.desktop</launchable>
+
+  <translation type="gettext">com.github.knuxify.SerialBowl.EarTag</translation>
+
+  <content_rating type="oars-1.1"/>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <requires>
+    <display_length compare="ge">300</display_length>
+  </requires>
+
+  <releases>
+    <release version="0.1.0" date="2022-07-31">
+      <description>Initial release.</description>
+    </release>
+  </releases>
+
+  <url type="homepage">https://gitlab.gnome.org/World/eartag</url>
+  <url type="bugtracker">https://gitlab.gnome.org/World/eartag/-/issues</url>
+
+  <categories>
+    <category>Utility</category>
+  </categories>
+
+  <kudos>
+    <kudo>ModernToolkit</kudo>
+  </kudos>
+
+  <custom>
+    <value key="Purism::form_factor">workstation</value>
+    <value key="Purism::form_factor">mobile</value>
+  </custom>
+</component>

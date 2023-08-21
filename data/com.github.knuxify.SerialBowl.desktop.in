@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Serial Bowl
+GenericName=Serial console
+Comment=Connect to serial console
+Exec=serialbowl %U
+Icon=com.github.knuxify.SerialBowl
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=GNOME;GTK;Tools;
+Keywords=serial;uart;console;debug;
+X-Purism-FormFactor=Workstation;Mobile;

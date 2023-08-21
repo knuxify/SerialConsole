@@ -1,0 +1,36 @@
+#!@PYTHON@
+
+# SPDX-License-Identifier: MIT
+# (c) 2023 knuxify
+
+import os
+import sys
+import signal
+import gettext
+import locale
+
+VERSION = '@VERSION@'
+pkgdatadir = '@pkgdatadir@'
+localedir = '@localedir@'
+
+sys.path.insert(1, pkgdatadir)
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+try:
+    locale.bindtextdomain('com.github.knuxify.SerialBowl', localedir)
+    locale.textdomain('com.github.knuxify.SerialBowl')
+except:
+    print("Python built without locale support, some translations may not work!")
+gettext.install('com.github.knuxify.SerialBowl', localedir)
+
+if __name__ == '__main__':
+    import gi
+
+    from gi.repository import Gio
+    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'serialbowl.gresource'))
+    resource._register()
+
+    import serialbowl
+    serialbowl.VERSION = VERSION
+
+    from serialbowl import main
+    sys.exit(main.main(VERSION))

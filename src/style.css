@@ -1,0 +1,8 @@
+.terminal {
+	padding: 6px;
+	transition: filter 0.1s linear;
+}
+
+.terminal:disabled {
+	filter: brightness(0.95);
+}

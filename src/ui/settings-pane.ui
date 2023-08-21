@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="SerialBowlSettingsPane" parent="GtkBox">
+    <property name="orientation">vertical</property>
+    <property name="hexpand">true</property>
+    <style><class name="background"/></style>
+
+    <child>
+      <object class="AdwHeaderBar" id="settings_header"/>
+    </child>
+
+    <child>
+      <object class="AdwPreferencesPage">
+        <child>
+          <object class="AdwPreferencesGroup" id="settings_box">
+            <property name="title" translatable="yes">Connection</property>
+
+            <property name="header-suffix">
+              <object class="GtkStack" id="open_button_switcher">
+                <child>
+                  <object class="GtkButton" id="open_button">
+                    <property name="label" translatable="yes">Open</property>
+                    <style><class name="suggested-action"/></style>
+                    <signal name="clicked" handler="open_serial"/>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkButton" id="close_button">
+                    <property name="label" translatable="yes">Close</property>
+                    <style><class name="destructive-action"/></style>
+                    <signal name="clicked" handler="close_serial"/>
+                  </object>
+                </child>
+              </object>
+            </property>
+
+            <child>
+              <object class="AdwComboRow" id="port_selector">
+                <property name="title" translatable="yes">Serial port</property>
+
+                <signal name="notify::selected" handler="set_port_from_selector"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwSwitchRow" id="reconnect_automatically">
+                <property name="title">Automatic reconnection</property>
+                <property name="subtitle" translatable="yes">Re-connect automatically when connection is lost</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwComboRow" id="baudrate_selector">
+                <property name="title" translatable="yes">Baud rate</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item>1200</item>
+                      <item>4800</item>
+                      <item>9600</item>
+                      <item>19200</item>
+                      <item>38400</item>
+                      <item>57600</item>
+                      <item>115200</item>
+                      <item translatable="yes">Custom</item>
+                    </items>
+                  </object>
+                </property>
+                <signal name="notify::selected" handler="set_baudrate_from_selector"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwEntryRow" id="custom_baudrate">
+                <property name="title" translatable="yes">Custom baud rate</property>
+                <property name="show-apply-button">true</property>
+                <signal name="apply" handler="set_baudrate_from_selector"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwComboRow" id="parity_selector">
+                <property name="title" translatable="yes">Parity</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

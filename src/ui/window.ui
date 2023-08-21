@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="SerialBowlWindow" parent="AdwApplicationWindow">
+    <property name="width-request">330</property>
+    <property name="height-request">200</property>
+    <property name="default-width">800</property>
+    <property name="default-height">800</property>
+
+    <property name="title">Serial Bowl</property>
+
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 500sp</condition>
+        <setter object="split_view" property="collapsed">True</setter>
+      </object>
+    </child>
+
+    <property name="content">
+      <object class="AdwNavigationSplitView" id="split_view">
+        <property name="sidebar">
+          <object class="AdwNavigationPage">
+            <property name="title" translatable="yes">Settings</property>
+            <property name="width-request">300</property>
+
+            <child>
+              <object class="SerialBowlSettingsPane" id="sidebar"/>
+            </child>
+          </object>
+        </property>
+
+        <property name="content">
+          <object class="AdwNavigationPage">
+            <property name="title" translatable="yes">Console</property>
+            <child>
+              <object class="GtkBox" id="console_container">
+                <property name="orientation">vertical</property>
+                <property name="hexpand">true</property>
+                <style>
+                  <class name="view"/>
+                </style>
+
+                <child>
+                  <object class="AdwHeaderBar" id="console_header">
+                    <style>
+                      <class name="flat"/>
+                    </style>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkScrolledWindow" id="terminal_window">
+                    <property name="vscrollbar-policy">always</property>
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="vexpand">true</property>
+                    <property name="hexpand">true</property>
+
+                    <child>
+                      <object class="VteTerminal" id="terminal">
+                        <signal name="commit" handler="terminal_commit"/>
+                        <style>
+                          <class name="terminal"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>
