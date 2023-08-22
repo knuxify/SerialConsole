@@ -9,7 +9,7 @@ import time
 import threading
 
 from .config import config, Parity, FlowControl, to_enum_str, from_enum_str, enum_to_stringlist
-from .common import disallow_nonnumeric, find_in_stringlist
+from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
 from .serial import SerialHandler
 
 @Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/window.ui')
@@ -37,11 +37,13 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         self.port_update_thread.start()
 
     def get_available_ports(self):
-        ports = [port[0] for port in serial.tools.list_ports.comports()]
-        self.ports.splice(0, self.ports.get_n_items(), ports)
+        ports = sorted([port[0] for port in serial.tools.list_ports.comports()])
+        copy_list_to_stringlist(ports, self.ports)
         try:
-            self.sidebar.port_selector.set_selected(ports.index(self.serial.port))
-        except ValueError:
+            self.sidebar.port_selector.set_selected(
+                find_in_stringlist(self.ports, self.serial.port)
+            )
+        except (TypeError, ValueError):
             pass
 
         if not self.serial.is_open:
@@ -64,7 +66,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
     def terminal_write_message(self, text):
         """Writes an info message to the terminal."""
-        if self.terminal.get_text()[0] == '\n\n':
+        if not self.terminal.get_text()[0].strip():
             self.terminal.feed(
                 bytes(f'\r\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
             )
@@ -290,6 +292,9 @@ class SerialBowlSettingsPane(Gtk.Box):
 
     @Gtk.Template.Callback()
     def set_port_from_selector(self, selector, *args):
+        if self._needs_setup:
+            return
+
         try:
             port = selector.get_selected_item().get_string()
         except AttributeError:

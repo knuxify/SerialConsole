@@ -30,3 +30,30 @@ def find_in_stringlist(model, item: str):
             return i
         i += 1
     return None
+
+
+def copy_list_to_stringlist(target: list, model):
+    """
+    Updates the model to match the input list. Assumes list has no duplicates.
+    """
+    model_conv = [p.get_string() for p in model]
+
+    target_set = set(target)
+    model_set = set(model_conv)
+
+    if target_set == model_set:
+        # Both lists are the same, no operation needed
+        return
+
+    added = target_set - model_set
+    removed = model_set - target_set
+
+    # TODO: Add efficient chunk splice mechanism. Since in our case,
+    # we will likely be adding/removing only one item at a time, anything
+    # fancier is unnecessary for now.
+
+    for item in removed:
+        model.remove(find_in_stringlist(model, item))
+
+    for item in [i for i in target if i in added]:  # ensures order
+        model.splice(target.index(item), 0, [item])
