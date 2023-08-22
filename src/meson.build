@@ -28,6 +28,7 @@ configure_file(
 serialbowl_sources = [
   '__init__.py',
   'config.py',
+  'common.py',
   'main.py',
   'serial.py',
   'window.py',

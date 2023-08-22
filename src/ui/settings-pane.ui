@@ -81,10 +81,51 @@
             </child>
 
             <child>
-              <object class="AdwComboRow" id="parity_selector">
-                <property name="title" translatable="yes">Parity</property>
+              <object class="AdwComboRow" id="data_bits_selector">
+                <property name="title" translatable="yes">Data bits</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item>5</item>
+                      <item>6</item>
+                      <item>7</item>
+                      <item>8</item>
+                    </items>
+                  </object>
+                </property>
+                <signal name="notify::selected" handler="set_data_bits_from_selector"/>
               </object>
             </child>
+
+            <child>
+              <object class="AdwComboRow" id="parity_selector">
+                <property name="title" translatable="yes">Parity</property>
+                <!-- Items are filled in-code -->
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwComboRow" id="stop_bits_selector">
+                <property name="title" translatable="yes">Stop bits</property>
+                <property name="model">
+                  <object class="GtkStringList">
+                    <items>
+                      <item> 1</item> <!-- BUG: setting this to just 1 causes the label to disappear, so there's an extra space added -->
+                      <item>2</item>
+                    </items>
+                  </object>
+                </property>
+                <signal name="notify::selected" handler="set_stop_bits_from_selector"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="AdwComboRow" id="flow_control_selector">
+                <property name="title" translatable="yes">Flow control</property>
+                <!-- Items are filled in-code -->
+              </object>
+            </child>
+
           </object>
         </child>
       </object>

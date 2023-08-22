@@ -8,7 +8,8 @@ import serial.tools.list_ports
 import time
 import threading
 
-from .config import config, Parity, to_enum_str, from_enum_str, enum_to_stringlist
+from .config import config, Parity, FlowControl, to_enum_str, from_enum_str, enum_to_stringlist
+from .common import disallow_nonnumeric, find_in_stringlist
 from .serial import SerialHandler
 
 @Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/window.ui')
@@ -56,6 +57,17 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     def terminal_read(self, serial, data, *args):
         self.terminal.feed(data.get_data())
 
+    def terminal_write_message(self, text):
+        """Writes an info message to the terminal."""
+        if self.terminal.get_text()[0] == '\n\n':
+            self.terminal.feed(
+                bytes(f'\r\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
+            )
+        else:
+            self.terminal.feed(
+                bytes(f'\r\n\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
+            )
+
     def set_terminal_color_scheme(self):
         """Sets up a terminal color scheme from the default colors."""
         style = self.get_style_context()
@@ -77,7 +89,11 @@ class SerialBowlSettingsPane(Gtk.Box):
     port_selector = Gtk.Template.Child()
     baudrate_selector = Gtk.Template.Child()
     custom_baudrate = Gtk.Template.Child()
+
+    data_bits_selector = Gtk.Template.Child()
     parity_selector = Gtk.Template.Child()
+    stop_bits_selector = Gtk.Template.Child()
+    flow_control_selector = Gtk.Template.Child()
 
     def __init__(self):
         super().__init__()
@@ -86,7 +102,7 @@ class SerialBowlSettingsPane(Gtk.Box):
 
         # Only allow numbers to be typed into custom baud rate field
         self.custom_baudrate.set_input_purpose(Gtk.InputPurpose.DIGITS)
-        self.custom_baudrate.get_delegate().connect('insert-text', self.disallow_nonnumeric)
+        self.custom_baudrate.get_delegate().connect('insert-text', disallow_nonnumeric)
 
         self.connect('realize', self._setup)
 
@@ -95,6 +111,9 @@ class SerialBowlSettingsPane(Gtk.Box):
         get_native returns NULL before the window is fully displayed,
         so we need to do setup then.
         """
+        if not self._needs_setup:
+            return
+
         self.serial = self.get_native().serial
         self.serial.connect('notify::is-open', self.update_open_button)
 
@@ -114,8 +133,18 @@ class SerialBowlSettingsPane(Gtk.Box):
             flags=Gio.SettingsBindFlags.DEFAULT
         )
 
+        # baud-rate is not included here, as its selector is set up separately.
+        # We don't do bindings here since each selector has its own "set from
+        # selector" function (and it wouldn't be possible since we need to
+        # convert from string to int first anyways).
+        params = {
+            'port': ('selector', self.port_selector),
+            'data-bits': ('selector', self.data_bits_selector),
+            'stop-bits': ('selector', self.stop_bits_selector),
+        }
+
         # Serial parameters are directly synced to config:
-        for property in ('port', 'baud-rate', 'data-bits'):
+        for property in ('port', 'baud-rate', 'data-bits', 'stop-bits'):
             self.serial.set_property(property, config[property])
 
             config.bind(
@@ -123,13 +152,22 @@ class SerialBowlSettingsPane(Gtk.Box):
                 flags=Gio.SettingsBindFlags.DEFAULT
             )
 
+            if property in params:
+                if params[property][0] == 'selector':
+                    selector = params[property][1]
+                    i = find_in_stringlist(selector.get_model(), str(config[property]))
+                    if i is None:
+                        i = 0
+                    selector.set_selected(i)
+
         # Enum properties need to be handled separately, else they
         # end up syncing the *strings*, not the *IDs*:
         enums = {
             'parity': (Parity, self.parity_selector),
+            'flow-control': (FlowControl, self.flow_control_selector),
         }
 
-        for property in ('parity', ):
+        for property in ('parity', 'flow-control'):
             self.serial.set_property(property, config.get_enum(property))
 
             config.bind(
@@ -142,7 +180,7 @@ class SerialBowlSettingsPane(Gtk.Box):
             selector.bind_property('selected', self.serial, property,
                 GObject.BindingFlags.BIDIRECTIONAL
             )
-            selector.set_selected(self.serial.get_property(property))
+            selector.set_selected(config.get_enum(property))
             self.serial.connect('notify::' + property, lambda *args: self.notify(property + '-str'))
 
         # Set up baud rate selector
@@ -165,6 +203,15 @@ class SerialBowlSettingsPane(Gtk.Box):
     @parity_str.setter
     def parity_str(self, value):
         self.serial.parity = from_enum_str(Parity, value)
+
+    @GObject.Property(type=str)
+    def flow_control_str(self):
+        """Workaround to allow us to sync settings."""
+        return to_enum_str(FlowControl, self.serial.flow_control)
+
+    @flow_control_str.setter
+    def flow_control_str(self, value):
+        self.serial.flow_control = from_enum_str(FlowControl, value)
 
     def update_open_button(self, *args):
         if self.serial.is_open:
@@ -228,14 +275,9 @@ class SerialBowlSettingsPane(Gtk.Box):
         if port == self.serial.port:
             return
         self.serial.port = port
-        _switched_port_text = _("switched port to {port}").format(port=port)
 
-        # Don't print initial newline if there's no text before this
-        terminal = self.get_native().terminal
-        if terminal.get_text()[0] == '\n\n':
-            terminal.feed(bytes(f'\r\033[0;90m--- {_switched_port_text} ---\r\n\033[0m', 'utf-8'))
-        else:
-            terminal.feed(bytes(f'\r\n\033[0;90m--- {_switched_port_text} ---\r\n\033[0m', 'utf-8'))
+        _switched_port_text = _("switched port to {port}").format(port=port)
+        self.get_native().terminal_write_message(_switched_port_text)
 
     @Gtk.Template.Callback()
     def set_baudrate_from_selector(self, *args):
@@ -252,12 +294,10 @@ class SerialBowlSettingsPane(Gtk.Box):
                 baudrate = 0
         self.serial.baud_rate = baudrate
 
-    def disallow_nonnumeric(self, entry, text, length, position, *args):
-        """
-        Handler for GtkEditable insert-text call that only allows numeric
-        values to be entered.
-        """
-        if not text:
-            return
-        if not text.isdigit():
-            GObject.signal_stop_emission_by_name(entry, 'insert-text')
+    @Gtk.Template.Callback()
+    def set_data_bits_from_selector(self, selector, *args):
+        self.serial.data_bits = int(selector.get_selected_item().get_string())
+
+    @Gtk.Template.Callback()
+    def set_stop_bits_from_selector(self, selector, *args):
+        self.serial.stop_bits = int(selector.get_selected_item().get_string())

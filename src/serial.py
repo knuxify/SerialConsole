@@ -7,7 +7,7 @@ import serial
 import time
 import threading
 
-from .config import Parity
+from .config import Parity, FlowControl
 
 REFRESH_INTERVAL = 0.2  # in seconds
 
@@ -81,6 +81,37 @@ class SerialHandler(GObject.Object):
             case Parity.SPACE: p = serial.PARITY_SPACE
 
         self.serial.parity = p
+
+    @GObject.Property(type=int)
+    def stop_bits(self):
+        bits = self.serial.stopbits
+        match bits:
+            case serial.STOPBITS_ONE: return 1
+            case serial.STOPBITS_TWO: return 2
+
+    @stop_bits.setter
+    def stop_bits(self, value):
+        match value:
+            case 1: self.serial.stopbits = serial.STOPBITS_ONE
+            case 2: self.serial.stopbits = serial.STOPBITS_TWO
+            case _:
+                raise ValueError
+
+    @GObject.Property(type=int)
+    def flow_control(self):
+        if self.serial.xonxoff:
+            return FlowControl.SOFTWARE
+        elif self.serial.rtscts:
+            return FlowControl.HARDWARE_RTS_CTS
+        elif self.serial.dsrdtr:
+            return FlowControl.HARDWARE_DSR_DTR
+        return FlowControl.NONE
+
+    @flow_control.setter
+    def flow_control(self, value):
+        self.serial.xonxoff = (value == FlowControl.SOFTWARE)
+        self.serial.rtscts = (value == FlowControl.HARDWARE_RTS_CTS)
+        self.serial.dsrdtr = (value == FlowControl.HARDWARE_DSR_DTR)
 
     @GObject.Property(type=bool, default=False, flags=GObject.ParamFlags.READABLE)
     def is_open(self):
