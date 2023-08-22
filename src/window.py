@@ -39,6 +39,11 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     def get_available_ports(self):
         ports = [port[0] for port in serial.tools.list_ports.comports()]
         self.ports.splice(0, self.ports.get_n_items(), ports)
+        try:
+            self.sidebar.port_selector.set_selected(ports.index(self.serial.port))
+        except ValueError:
+            pass
+
         if not self.serial.is_open:
             self.sidebar.open_button.set_sensitive(bool(ports))
 
@@ -145,7 +150,24 @@ class SerialBowlSettingsPane(Gtk.Box):
 
         # Serial parameters are directly synced to config:
         for property in ('port', 'baud-rate', 'data-bits', 'stop-bits'):
-            self.serial.set_property(property, config[property])
+
+            if property == 'port':
+                # For ports, there is no guarantee that the last used
+                # port will be available, so we set the available port
+                # if and only if it's actually available; otherwise we
+                # get the first item in the model.
+                ports = [p.get_string() for p in self.get_native().ports]
+                if config['port'] in ports:
+                    port = config['port']
+                elif ports:
+                    port = ports[0]
+                    config['port'] = port
+                else:
+                    port = ''
+                    config['port'] = port
+                self.serial.port = port
+            else:
+                self.serial.set_property(property, config[property])
 
             config.bind(
                 property, self.serial, property,
