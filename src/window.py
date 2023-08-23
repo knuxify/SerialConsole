@@ -16,6 +16,7 @@ from .serial import SerialHandler
 class SerialBowlWindow(Adw.ApplicationWindow):
     __gtype_name__ = 'SerialBowlWindow'
 
+    split_view = Gtk.Template.Child()
     sidebar = Gtk.Template.Child()
     terminal = Gtk.Template.Child()
 
@@ -64,6 +65,14 @@ class SerialBowlWindow(Adw.ApplicationWindow):
             time.sleep(1)
 
     # Console handling functions
+
+    @Gtk.Template.Callback()
+    def open_sidebar(self, *args):
+        self.split_view.props.show_sidebar = True
+
+    @Gtk.Template.Callback()
+    def close_sidebar(self, *args):
+        self.split_view.props.show_sidebar = False
 
     @Gtk.Template.Callback()
     def terminal_commit(self, terminal, text, size, *args):
@@ -173,7 +182,7 @@ class SerialBowlSettingsPane(Gtk.Box):
 
     @GObject.Property(type=str)
     def port_display(self):
-        return self.serial.port if self.serial.is_open else ''
+        return self.serial.port if self.serial.is_open else _('(no connection)')
 
     def setup_settings_bindings(self):
         config.bind(

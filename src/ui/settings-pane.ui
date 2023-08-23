@@ -144,7 +144,7 @@
                     <child>
                       <object class="AdwActionRow" id="custom_scrollback">
                         <property name="title" translatable="yes">Scrollback size</property>
-                        <property name="sensitive" bind-source="unlimited_scrollback_toggle" bind-property="active" bind-flags="invert-boolean"/>
+                        <property name="sensitive" bind-source="unlimited_scrollback_toggle" bind-property="active" bind-flags="invert-boolean | sync-create"/>
 
                         <child type="suffix">
                           <object class="GtkSpinButton" id="custom_scrollback_spinbutton">

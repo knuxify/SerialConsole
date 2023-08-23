@@ -17,7 +17,7 @@
     </child>
 
     <property name="content">
-      <object class="AdwNavigationSplitView" id="split_view">
+      <object class="AdwOverlaySplitView" id="split_view">
         <style><class name="sb-container"/></style>
 
         <property name="sidebar">
@@ -28,7 +28,21 @@
             <child>
               <object class="AdwToolbarView">
                 <child type="top">
-                  <object class="AdwHeaderBar" id="sidebar_header"/>
+                  <object class="AdwHeaderBar" id="sidebar_header">
+                    <property name="title-widget">
+                      <object class="AdwWindowTitle">
+                        <property name="title">Settings</property>
+                      </object>
+                    </property>
+                    <child type="end">
+                      <object class="GtkButton">
+                        <property name="visible" bind-source="split_view" bind-property="collapsed" bind-flags="sync-create"/>
+                        <property name="icon-name">go-previous-symbolic</property>
+                        <property name="tooltip-text" translatable="yes">Close Sidebar</property>
+                        <signal name="clicked" handler="close_sidebar"/>
+                      </object>
+                    </child>
+                  </object>
                 </child>
 
                 <child>
@@ -56,6 +70,15 @@
                         <property name="title" translatable="yes">Console</property>
                       </object>
                     </property>
+
+                    <child type="start">
+                      <object class="GtkButton">
+                        <property name="icon-name">preferences-system-symbolic</property>
+                        <property name="tooltip-text" translatable="yes">Settings</property>
+                        <property name="visible" bind-source="split_view" bind-property="collapsed" bind-flags="sync-create"/>
+                        <signal name="clicked" handler="open_sidebar"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
 
