@@ -17,7 +17,7 @@
   </enum>
 
   <schema id="com.github.knuxify.SerialBowl" path="/com/github/knuxify/SerialBowl/">
-    <key name="port" type="o">
+    <key name="port" type="s"> <!-- we could use "o" here for path, but that doesn't let us null it out -->
       <default>"/dev/ttyUSB0"</default>
       <summary>Path to serial device</summary>
     </key>
