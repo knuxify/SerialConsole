@@ -24,6 +24,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.get_application().get_style_manager().connect(
+            'notify::dark', self.theme_change_callback
+        )
         self.set_terminal_color_scheme()
 
         self.serial = SerialHandler()
@@ -79,13 +82,21 @@ class SerialBowlWindow(Adw.ApplicationWindow):
                 bytes(f'\r\n\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
             )
 
-    def set_terminal_color_scheme(self):
+    def set_terminal_color_scheme(self, *args):
         """Sets up a terminal color scheme from the default colors."""
         style = self.get_style_context()
         bg = style.lookup_color('view_bg_color')[1]
         fg = style.lookup_color('view_fg_color')[1]
         self.terminal.set_color_background(bg)
         self.terminal.set_color_foreground(fg)
+
+    # When the 'dark' property on the style manager is changed, the
+    # stylesheet for the new mode has not yet been loaded. Turns out,
+    # running the change function through GLib.idle_add is enough to
+    # reload it once everything's done loading.
+
+    def theme_change_callback(self, *args):
+        GLib.idle_add(self.set_terminal_color_scheme)
 
 @Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/settings-pane.ui')
 class SerialBowlSettingsPane(Gtk.Box):
