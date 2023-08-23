@@ -6,3 +6,7 @@
 .terminal:disabled {
 	opacity: 0.5;
 }
+
+.sb-settings-container {
+	margin: 12px;
+}

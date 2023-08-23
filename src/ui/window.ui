@@ -5,26 +5,36 @@
     <property name="width-request">330</property>
     <property name="height-request">200</property>
     <property name="default-width">800</property>
-    <property name="default-height">800</property>
+    <property name="default-height">600</property>
 
     <property name="title">Serial Bowl</property>
 
     <child>
       <object class="AdwBreakpoint">
-        <condition>max-width: 500sp</condition>
+        <condition>max-width: 600sp</condition>
         <setter object="split_view" property="collapsed">True</setter>
       </object>
     </child>
 
     <property name="content">
       <object class="AdwNavigationSplitView" id="split_view">
+        <style><class name="sb-container"/></style>
+
         <property name="sidebar">
           <object class="AdwNavigationPage">
             <property name="title" translatable="yes">Settings</property>
             <property name="width-request">300</property>
 
             <child>
-              <object class="SerialBowlSettingsPane" id="sidebar"/>
+              <object class="AdwToolbarView">
+                <child type="top">
+                  <object class="AdwHeaderBar" id="sidebar_header"/>
+                </child>
+
+                <child>
+                  <object class="SerialBowlSettingsPane" id="sidebar"/>
+                </child>
+              </object>
             </child>
           </object>
         </property>
@@ -33,18 +43,19 @@
           <object class="AdwNavigationPage">
             <property name="title" translatable="yes">Console</property>
             <child>
-              <object class="GtkBox" id="console_container">
-                <property name="orientation">vertical</property>
+              <object class="AdwToolbarView" id="console_container">
                 <property name="hexpand">true</property>
                 <style>
                   <class name="view"/>
                 </style>
 
-                <child>
+                <child type="top">
                   <object class="AdwHeaderBar" id="console_header">
-                    <style>
-                      <class name="flat"/>
-                    </style>
+                    <property name="title-widget">
+                      <object class="AdwWindowTitle">
+                        <property name="title" translatable="yes">Console</property>
+                      </object>
+                    </property>
                   </object>
                 </child>
 

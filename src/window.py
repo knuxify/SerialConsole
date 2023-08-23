@@ -19,6 +19,8 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     sidebar = Gtk.Template.Child()
     terminal = Gtk.Template.Child()
 
+    console_header = Gtk.Template.Child()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -35,6 +37,8 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         self.get_available_ports()
         self.port_update_thread = threading.Thread(target=self.port_update_loop, daemon=True)
         self.port_update_thread.start()
+
+    # Port update functions
 
     def get_available_ports(self):
         ports = sorted([port[0] for port in serial.tools.list_ports.comports()])
@@ -242,6 +246,7 @@ class SerialBowlSettingsPane(Gtk.Box):
             self.open_button.set_sensitive(False)
             self.close_button.set_sensitive(True)
             self.open_button_switcher.set_visible_child(self.close_button)
+            self.get_native().console_header.get_title_widget().set_subtitle(self.serial.port)
         else:
             # Handle lost connection
             if self.serial._connection_lost:
@@ -254,6 +259,7 @@ class SerialBowlSettingsPane(Gtk.Box):
             self.open_button.set_sensitive(bool(self.ports.get_n_items()))
             self.close_button.set_sensitive(False)
             self.open_button_switcher.set_visible_child(self.open_button)
+            self.get_native().console_header.get_title_widget().set_subtitle('')
 
     def reconnect_loop(self):
         """Awaits for the currently opened device to come back online."""
