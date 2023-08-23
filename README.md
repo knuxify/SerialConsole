@@ -2,10 +2,8 @@
 
 Access any serial console
 
-## About
+## Call for contributors
 
-This is a small pet project of mine to replace my current serial console app of choice, [CuteCom]. It's *alright*, it's small and does its job - and does so without a fuss. However, it's not exactly right for my job - the terminal it displays is notably missing support for colored text and doesn't use a monospaced font.
+**NOTE**: This has not been thoroughly tested! My only use case for a serial console is using it read-only (*sometimes* write-only) through a UART dongle. I make no guarantee that it will work on any other hardware!
 
-So, I figured, "why not make my own"?
-
-I don't intend to develop this nearly as much as Ear Tag. This is a simple app, and it will do what I need it to do, and nothing else.
+If you own any other serial devices, and would like to contribute, feel free to do so! Even opening an issue with your own suggestions is already very helpful.
