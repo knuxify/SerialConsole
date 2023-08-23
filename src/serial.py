@@ -164,10 +164,10 @@ class SerialHandler(GObject.Object):
             except TypeError:  # Serial was closed
                 break
             except serial.serialutil.SerialException as e:
-                msg = str(e)
-                if '9' in msg:  # Serial was closed mid-read
+                err = e.errno
+                if err == 9:  # Serial was closed mid-read
                     break
-                elif '16' in msg:  # Resource busy
+                elif err == 16:  # Resource busy
                     GLib.idle_add(self.emit, 'device_busy')
                     break
                 # Connection has been lost
