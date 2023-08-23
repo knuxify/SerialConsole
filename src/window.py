@@ -45,7 +45,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
     def get_available_ports(self):
         ports = sorted([port[0] for port in serial.tools.list_ports.comports()])
+        self.sidebar._ignore_port_change = True
         copy_list_to_stringlist(ports, self.ports)
+        self.sidebar._ignore_port_change = False
         try:
             self.sidebar.port_selector.set_selected(
                 find_in_stringlist(self.ports, self.serial.port)
@@ -66,6 +68,8 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def terminal_commit(self, terminal, text, size, *args):
         """Get input from the terminal and send it over serial."""
+        if config['echo']:
+            self.terminal.feed(bytes(text, 'utf-8'))
         self.serial.write_text(text)
 
     def terminal_read(self, serial, data, *args):
@@ -73,6 +77,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
     def terminal_write_message(self, text):
         """Writes an info message to the terminal."""
+        if config['disable-info-messages']:
+            return
+
         if not self.terminal.get_text()[0].strip():
             self.terminal.feed(
                 bytes(f'\r\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
@@ -117,10 +124,18 @@ class SerialBowlSettingsPane(Gtk.Box):
     stop_bits_selector = Gtk.Template.Child()
     flow_control_selector = Gtk.Template.Child()
 
+    custom_scrollback_spinbutton = Gtk.Template.Child()
+    unlimited_scrollback_toggle = Gtk.Template.Child()
+    disable_info_messages_toggle = Gtk.Template.Child()
+    local_echo_toggle = Gtk.Template.Child()
+
     def __init__(self):
         super().__init__()
         self.reconnect_thread = None
+        self._ignore_port_change = False
         self._needs_setup = True
+        self.custom_scrollback_spinbutton.set_range(0, 10000000)
+        self.custom_scrollback_spinbutton.set_increments(100, 1000)
 
         # Only allow numbers to be typed into custom baud rate field
         self.custom_baudrate.set_input_purpose(Gtk.InputPurpose.DIGITS)
@@ -142,11 +157,23 @@ class SerialBowlSettingsPane(Gtk.Box):
         self.ports = self.get_native().ports
         self.port_selector.set_model(self.ports)
 
+        title = self.get_native().console_header.get_title_widget()
+        self.bind_property(
+            'port_display', title, 'subtitle',
+            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE
+        )
+        self.serial.connect('notify::port', lambda *args: self.notify('port-display'))
+        self.serial.connect('notify::is-open', lambda *args: self.notify('port-display'))
+
         self.update_open_button()
 
         self.setup_settings_bindings()
 
         self._needs_setup = False
+
+    @GObject.Property(type=str)
+    def port_display(self):
+        return self.serial.port if self.serial.is_open else ''
 
     def setup_settings_bindings(self):
         config.bind(
@@ -234,6 +261,38 @@ class SerialBowlSettingsPane(Gtk.Box):
                 self.custom_baudrate.set_text(str(config['baud-rate']))
                 self.baudrate_selector.set_selected(i)
 
+        # Terminal settings
+        config.bind(
+            'scrollback',
+            self.custom_scrollback_spinbutton, 'value',
+            flags=Gio.SettingsBindFlags.DEFAULT
+        )
+        config.bind(
+            'unlimited-scrollback',
+            self.unlimited_scrollback_toggle, 'active',
+            flags=Gio.SettingsBindFlags.DEFAULT
+        )
+        self.custom_scrollback_spinbutton.connect('value-changed', self.update_scrollback_from_pane)
+        self.unlimited_scrollback_toggle.connect('notify::active', self.update_scrollback_from_pane)
+        self.update_scrollback_from_pane()
+
+        config.bind(
+            'disable-info-messages',
+            self.disable_info_messages_toggle, 'active',
+            flags=Gio.SettingsBindFlags.DEFAULT
+        )
+
+        config.bind(
+            'echo', self.local_echo_toggle, 'active',
+            flags=Gio.SettingsBindFlags.DEFAULT
+        )
+
+    def update_scrollback_from_pane(self, *args):
+        if config['unlimited-scrollback']:
+            self.get_native().terminal.set_scrollback_lines(-1)
+        else:
+            self.get_native().terminal.set_scrollback_lines(config['scrollback'])
+
     @GObject.Property(type=str)
     def parity_str(self):
         """Workaround to allow us to sync settings."""
@@ -257,7 +316,6 @@ class SerialBowlSettingsPane(Gtk.Box):
             self.open_button.set_sensitive(False)
             self.close_button.set_sensitive(True)
             self.open_button_switcher.set_visible_child(self.close_button)
-            self.get_native().console_header.get_title_widget().set_subtitle(self.serial.port)
         else:
             # Handle lost connection
             if self.serial._connection_lost:
@@ -270,7 +328,6 @@ class SerialBowlSettingsPane(Gtk.Box):
             self.open_button.set_sensitive(bool(self.ports.get_n_items()))
             self.close_button.set_sensitive(False)
             self.open_button_switcher.set_visible_child(self.open_button)
-            self.get_native().console_header.get_title_widget().set_subtitle('')
 
     def reconnect_loop(self):
         """Awaits for the currently opened device to come back online."""
@@ -309,7 +366,7 @@ class SerialBowlSettingsPane(Gtk.Box):
 
     @Gtk.Template.Callback()
     def set_port_from_selector(self, selector, *args):
-        if self._needs_setup:
+        if self._needs_setup or self._ignore_port_change:
             return
 
         try:

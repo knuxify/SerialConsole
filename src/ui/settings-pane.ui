@@ -16,119 +16,165 @@
           <object class="AdwClamp">
             <style><class name="sb-settings-container"/></style>
             <child>
-              <object class="AdwPreferencesGroup" id="settings_box">
-                <property name="title" translatable="yes">Connection</property>
+              <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">12</property>
 
-                <property name="header-suffix">
-                  <object class="GtkStack" id="open_button_switcher">
+                <child>
+                  <object class="AdwPreferencesGroup" id="settings_box">
+                    <property name="title" translatable="yes">Connection</property>
+
+                    <property name="header-suffix">
+                      <object class="GtkStack" id="open_button_switcher">
+                        <child>
+                          <object class="GtkButton" id="open_button">
+                            <property name="label" translatable="yes">Open</property>
+                            <style><class name="suggested-action"/></style>
+                            <signal name="clicked" handler="open_serial"/>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkButton" id="close_button">
+                            <property name="label" translatable="yes">Close</property>
+                            <style><class name="destructive-action"/></style>
+                            <signal name="clicked" handler="close_serial"/>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+
                     <child>
-                      <object class="GtkButton" id="open_button">
-                        <property name="label" translatable="yes">Open</property>
-                        <style><class name="suggested-action"/></style>
-                        <signal name="clicked" handler="open_serial"/>
+                      <object class="AdwComboRow" id="port_selector">
+                        <property name="title" translatable="yes">Serial port</property>
+
+                        <signal name="notify::selected" handler="set_port_from_selector"/>
                       </object>
                     </child>
 
                     <child>
-                      <object class="GtkButton" id="close_button">
-                        <property name="label" translatable="yes">Close</property>
-                        <style><class name="destructive-action"/></style>
-                        <signal name="clicked" handler="close_serial"/>
+                      <object class="AdwSwitchRow" id="reconnect_automatically">
+                        <property name="title">Automatic reconnection</property>
+                        <property name="subtitle" translatable="yes">Re-connect automatically when connection is lost</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwComboRow" id="baudrate_selector">
+                        <property name="title" translatable="yes">Baud rate</property>
+                        <property name="model">
+                          <object class="GtkStringList">
+                            <items>
+                              <item>1200</item>
+                              <item>4800</item>
+                              <item>9600</item>
+                              <item>19200</item>
+                              <item>38400</item>
+                              <item>57600</item>
+                              <item>115200</item>
+                              <item translatable="yes">Custom</item>
+                            </items>
+                          </object>
+                        </property>
+                        <signal name="notify::selected" handler="set_baudrate_from_selector"/>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwEntryRow" id="custom_baudrate">
+                        <property name="title" translatable="yes">Custom baud rate</property>
+                        <property name="show-apply-button">true</property>
+                        <signal name="apply" handler="set_baudrate_from_selector"/>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwComboRow" id="data_bits_selector">
+                        <property name="title" translatable="yes">Data bits</property>
+                        <property name="model">
+                          <object class="GtkStringList">
+                            <items>
+                              <item>5</item>
+                              <item>6</item>
+                              <item>7</item>
+                              <item>8</item>
+                            </items>
+                          </object>
+                        </property>
+                        <signal name="notify::selected" handler="set_data_bits_from_selector"/>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwComboRow" id="parity_selector">
+                        <property name="title" translatable="yes">Parity</property>
+                        <!-- Items are filled in-code -->
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwComboRow" id="stop_bits_selector">
+                        <property name="title" translatable="yes">Stop bits</property>
+                        <property name="model">
+                          <object class="GtkStringList">
+                            <items>
+                              <item> 1</item> <!-- BUG: setting this to just 1 causes the label to disappear, so there's an extra space added -->
+                              <item>2</item>
+                            </items>
+                          </object>
+                        </property>
+                        <signal name="notify::selected" handler="set_stop_bits_from_selector"/>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwComboRow" id="flow_control_selector">
+                        <property name="title" translatable="yes">Flow control</property>
+                        <!-- Items are filled in-code -->
+                      </object>
+                    </child>
+
+                  </object>
+                </child>
+
+                <child>
+                  <object class="AdwPreferencesGroup" id="console_settings_box">
+                    <property name="title" translatable="yes">Console</property>
+
+                    <child>
+                      <object class="AdwActionRow" id="custom_scrollback">
+                        <property name="title" translatable="yes">Scrollback size</property>
+                        <property name="sensitive" bind-source="unlimited_scrollback_toggle" bind-property="active" bind-flags="invert-boolean"/>
+
+                        <child type="suffix">
+                          <object class="GtkSpinButton" id="custom_scrollback_spinbutton">
+                            <property name="valign">center</property>
+                            <property name="width-request">125</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwSwitchRow" id="unlimited_scrollback_toggle">
+                        <property name="title" translatable="yes">Unlimited scrollback</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwSwitchRow" id="disable_info_messages_toggle">
+                        <property name="title" translatable="yes">Disable informational messages</property>
+                        <property name="subtitle" translatable="yes">Hide messages from the program</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwSwitchRow" id="local_echo_toggle">
+                        <property name="title" translatable="yes">Enable local echo</property>
                       </object>
                     </child>
                   </object>
-                </property>
-
-                <child>
-                  <object class="AdwComboRow" id="port_selector">
-                    <property name="title" translatable="yes">Serial port</property>
-
-                    <signal name="notify::selected" handler="set_port_from_selector"/>
-                  </object>
                 </child>
-
-                <child>
-                  <object class="AdwSwitchRow" id="reconnect_automatically">
-                    <property name="title">Automatic reconnection</property>
-                    <property name="subtitle" translatable="yes">Re-connect automatically when connection is lost</property>
-                  </object>
-                </child>
-
-                <child>
-                  <object class="AdwComboRow" id="baudrate_selector">
-                    <property name="title" translatable="yes">Baud rate</property>
-                    <property name="model">
-                      <object class="GtkStringList">
-                        <items>
-                          <item>1200</item>
-                          <item>4800</item>
-                          <item>9600</item>
-                          <item>19200</item>
-                          <item>38400</item>
-                          <item>57600</item>
-                          <item>115200</item>
-                          <item translatable="yes">Custom</item>
-                        </items>
-                      </object>
-                    </property>
-                    <signal name="notify::selected" handler="set_baudrate_from_selector"/>
-                  </object>
-                </child>
-
-                <child>
-                  <object class="AdwEntryRow" id="custom_baudrate">
-                    <property name="title" translatable="yes">Custom baud rate</property>
-                    <property name="show-apply-button">true</property>
-                    <signal name="apply" handler="set_baudrate_from_selector"/>
-                  </object>
-                </child>
-
-                <child>
-                  <object class="AdwComboRow" id="data_bits_selector">
-                    <property name="title" translatable="yes">Data bits</property>
-                    <property name="model">
-                      <object class="GtkStringList">
-                        <items>
-                          <item>5</item>
-                          <item>6</item>
-                          <item>7</item>
-                          <item>8</item>
-                        </items>
-                      </object>
-                    </property>
-                    <signal name="notify::selected" handler="set_data_bits_from_selector"/>
-                  </object>
-                </child>
-
-                <child>
-                  <object class="AdwComboRow" id="parity_selector">
-                    <property name="title" translatable="yes">Parity</property>
-                    <!-- Items are filled in-code -->
-                  </object>
-                </child>
-
-                <child>
-                  <object class="AdwComboRow" id="stop_bits_selector">
-                    <property name="title" translatable="yes">Stop bits</property>
-                    <property name="model">
-                      <object class="GtkStringList">
-                        <items>
-                          <item> 1</item> <!-- BUG: setting this to just 1 causes the label to disappear, so there's an extra space added -->
-                          <item>2</item>
-                        </items>
-                      </object>
-                    </property>
-                    <signal name="notify::selected" handler="set_stop_bits_from_selector"/>
-                  </object>
-                </child>
-
-                <child>
-                  <object class="AdwComboRow" id="flow_control_selector">
-                    <property name="title" translatable="yes">Flow control</property>
-                    <!-- Items are filled in-code -->
-                  </object>
-                </child>
-
               </object>
             </child>
           </object>

@@ -5,6 +5,7 @@ Contains code for handling the serial device.
 from gi.repository import GLib, GObject
 import serial
 import time
+import traceback
 import threading
 
 from .config import Parity, FlowControl
@@ -120,7 +121,15 @@ class SerialHandler(GObject.Object):
     def open(self):
         """Opens the serial port."""
         self._force_close = False
-        self.serial.open()
+        try:
+            self.serial.open()
+        except serial.serialutil.SerialException as e:
+            if e.errno == 2:  # Happens with symlinked ports sometimes
+                self._connection_lost = True
+                self.notify('is-open')
+                return
+            traceback.print_exc()
+            return
         self.serial_loop_start()
         self.notify('is-open')
 

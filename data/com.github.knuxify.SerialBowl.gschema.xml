@@ -53,5 +53,29 @@
       <default>"None"</default>
       <summary>Flow control</summary>
     </key>
+
+    <!-- Terminal settings -->
+
+    <key name="scrollback" type="i">
+      <range min="0" max="10000000"/>
+      <default>1000</default>
+      <summary>Scrollback size</summary>
+    </key>
+
+    <key name="unlimited-scrollback" type="b">
+      <default>false</default>
+      <summary>Unlimited scrollback</summary>
+    </key>
+
+    <key name="disable-info-messages" type="b">
+      <default>false</default>
+      <summary>Disable informational messages</summary>
+      <description>Hide messages from the program</description>
+    </key>
+
+    <key name="echo" type="b">
+      <default>false</default>
+      <summary>Enable local echo</summary>
+    </key>
   </schema>
 </schemalist>
