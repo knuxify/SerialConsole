@@ -18,7 +18,7 @@ def disallow_nonnumeric(self, entry, text, length, position, *args):
 
 def find_in_stringlist(model, item: str):
     """
-    Gets the position of an item in the StringList, or None if not found.
+    Gets the position of an item in the StringList, or -1 if not found.
     Replacement for .find function in models that don't have it.
     """
     i = 0
@@ -29,7 +29,7 @@ def find_in_stringlist(model, item: str):
         if found.get_string() == item:
             return i
         i += 1
-    return None
+    return -1
 
 
 def copy_list_to_stringlist(target: list, model):

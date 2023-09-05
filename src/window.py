@@ -53,7 +53,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
             self.sidebar.port_selector.set_selected(
                 find_in_stringlist(self.ports, self.serial.port)
             )
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             pass
 
         if not self.serial.is_open:
@@ -231,7 +231,7 @@ class SerialBowlSettingsPane(Gtk.Box):
                 if params[property][0] == 'selector':
                     selector = params[property][1]
                     i = find_in_stringlist(selector.get_model(), str(config[property]))
-                    if i is None:
+                    if i < 0:
                         i = 0
                     selector.set_selected(i)
 
