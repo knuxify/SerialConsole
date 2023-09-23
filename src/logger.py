@@ -4,8 +4,6 @@ Contains code for handling the serial device.
 
 from gi.repository import GLib, GObject, Gio
 import os
-import time
-import traceback
 
 from .config import config
 
@@ -46,7 +44,7 @@ class SerialLogger(GObject.Object):
             if not os.path.exists(basedir):
                 try:
                     os.makedirs(basedir)
-                except:
+                except:  # noqa: E722
                     self.emit('log-open-failure')
                     return
 
@@ -83,10 +81,10 @@ class SerialLogger(GObject.Object):
         """Opens the logfile."""
         try:
             if config['log-binary']:
-                self._file = open(value, 'a+b')
+                self._file = open(self._path, 'a+b')
             else:
-                self._file = open(value, 'a+')
-        except:
+                self._file = open(self._path, 'a+')
+        except:  # noqa: E722
             self.emit('log-open-failure')
             return
 

@@ -145,7 +145,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
                 bytes(f'\r\n\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
             )
 
-        self.logger.write_text(f'\r\n--- text ---')
+        self.logger.write_text(f'\r\n--- {text} ---')
 
     def set_terminal_color_scheme(self, *args):
         """Sets up a terminal color scheme from the default colors."""
@@ -304,7 +304,8 @@ class SerialBowlSettingsPane(Gtk.Box):
 
             selector = enums[property][1]
             selector.set_model(enum_to_stringlist(enums[property][0]))
-            selector.bind_property('selected', self.serial, property,
+            selector.bind_property(
+                'selected', self.serial, property,
                 GObject.BindingFlags.BIDIRECTIONAL
             )
             selector.set_selected(config.get_enum(property))

@@ -64,22 +64,22 @@ class SerialHandler(GObject.Object):
     @GObject.Property(type=int)
     def parity(self):
         match self.serial.parity:
-            case serial.PARITY_NONE:  p = Parity.NONE
-            case serial.PARITY_EVEN:  p = Parity.EVEN
-            case serial.PARITY_ODD:   p = Parity.ODD
-            case serial.PARITY_MARK:  p = Parity.MARK
-            case serial.PARITY_SPACE: p = Parity.SPACE
+            case serial.PARITY_NONE:  p = Parity.NONE   # noqa: E241
+            case serial.PARITY_EVEN:  p = Parity.EVEN   # noqa: E241
+            case serial.PARITY_ODD:   p = Parity.ODD    # noqa: E241
+            case serial.PARITY_MARK:  p = Parity.MARK   # noqa: E241
+            case serial.PARITY_SPACE: p = Parity.SPACE  # noqa: E241
 
         return p
 
     @parity.setter
     def parity(self, value):
         match int(value):
-            case Parity.NONE:  p = serial.PARITY_NONE
-            case Parity.EVEN:  p = serial.PARITY_EVEN
-            case Parity.ODD:   p = serial.PARITY_ODD
-            case Parity.MARK:  p = serial.PARITY_MARK
-            case Parity.SPACE: p = serial.PARITY_SPACE
+            case Parity.NONE:  p = serial.PARITY_NONE   # noqa: E241
+            case Parity.EVEN:  p = serial.PARITY_EVEN   # noqa: E241
+            case Parity.ODD:   p = serial.PARITY_ODD    # noqa: E241
+            case Parity.MARK:  p = serial.PARITY_MARK   # noqa: E241
+            case Parity.SPACE: p = serial.PARITY_SPACE  # noqa: E241
 
         self.serial.parity = p
 
