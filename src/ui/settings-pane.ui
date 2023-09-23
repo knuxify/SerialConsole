@@ -175,6 +175,32 @@
                     </child>
                   </object>
                 </child>
+
+                <child>
+                  <object class="AdwPreferencesGroup" id="logging_settings_box">
+                    <property name="title" translatable="yes">Logging</property>
+
+                    <child type="header-suffix">
+                      <object class="GtkSwitch" id="log_enable_toggle">
+                        <property name="tooltip-text" translatable="yes">Enable logging</property>
+                        <property name="valign">center</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwEntryRow" id="log_path_entry">
+                        <property name="title" translatable="yes">Log path</property>
+                        <property name="show-apply-button">true</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="AdwSwitchRow" id="log_binary_toggle">
+                        <property name="title" translatable="yes">Write raw binary data to log file</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

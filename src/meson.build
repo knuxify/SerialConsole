@@ -29,6 +29,7 @@ serialbowl_sources = [
   '__init__.py',
   'config.py',
   'common.py',
+  'logger.py',
   'main.py',
   'serial.py',
   'window.py',

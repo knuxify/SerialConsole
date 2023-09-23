@@ -11,6 +11,7 @@ import threading
 from .config import config, Parity, FlowControl, to_enum_str, from_enum_str, enum_to_stringlist
 from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
 from .serial import SerialHandler
+from .logger import SerialLogger
 
 @Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/window.ui')
 class SerialBowlWindow(Adw.ApplicationWindow):
@@ -19,6 +20,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     split_view = Gtk.Template.Child()
     sidebar = Gtk.Template.Child()
     terminal = Gtk.Template.Child()
+    toast_overlay = Gtk.Template.Child()
 
     console_header = Gtk.Template.Child()
 
@@ -41,6 +43,21 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         self.get_available_ports()
         self.port_update_thread = threading.Thread(target=self.port_update_loop, daemon=True)
         self.port_update_thread.start()
+
+        self.logger = SerialLogger(self.serial)
+        self.logger.connect('log-open-failure', self.on_log_open_failure)
+
+        self.connect('close-request', self.on_close)
+
+    def on_close(self, *args):
+        self.serial.close()
+        self.logger.close_log()
+
+    def on_log_open_failure(self, *args):
+        self.sidebar.log_enable_toggle.set_active(False)
+        self.toast_overlay.add_toast(
+            Adw.Toast.new(_("Failed to open log file for writing; check the path and try again"))
+        )
 
     # Port update functions
 
@@ -82,6 +99,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         """Get input from the terminal and send it over serial."""
         if config['echo']:
             self.terminal.feed(bytes(text, 'utf-8'))
+            self.logger.write_text(text)
         self.serial.write_text(text)
 
     def terminal_read(self, serial, data, *args):
@@ -100,6 +118,8 @@ class SerialBowlWindow(Adw.ApplicationWindow):
             self.terminal.feed(
                 bytes(f'\r\n\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
             )
+
+        self.logger.write_text(f'\r\n--- text ---')
 
     def set_terminal_color_scheme(self, *args):
         """Sets up a terminal color scheme from the default colors."""
@@ -140,6 +160,9 @@ class SerialBowlSettingsPane(Gtk.Box):
     unlimited_scrollback_toggle = Gtk.Template.Child()
     disable_info_messages_toggle = Gtk.Template.Child()
     local_echo_toggle = Gtk.Template.Child()
+
+    log_enable_toggle = Gtk.Template.Child()
+    log_path_entry = Gtk.Template.Child()
 
     def __init__(self):
         super().__init__()
@@ -298,6 +321,19 @@ class SerialBowlSettingsPane(Gtk.Box):
             'echo', self.local_echo_toggle, 'active',
             flags=Gio.SettingsBindFlags.DEFAULT
         )
+
+        # Logging settings
+        config.bind(
+            'log-enable',
+            self.log_enable_toggle, 'active',
+            flags=Gio.SettingsBindFlags.DEFAULT
+        )
+
+        self.log_path_entry.set_text(config['log-path'])
+        self.log_path_entry.connect('apply', self.set_log_path_from_pane)
+
+    def set_log_path_from_pane(self, *args):
+        config['log-path'] = self.log_path_entry.get_text()
 
     def update_scrollback_from_pane(self, *args):
         if config['unlimited-scrollback']:
