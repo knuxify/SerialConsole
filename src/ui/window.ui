@@ -89,6 +89,13 @@
                   </object>
                 </child>
 
+                <child type="top">
+                  <object class="AdwBanner" id="reconnecting_banner">
+                    <property name="title" translatable="yes">Connection lost; attempting to reconnect…</property>
+                    <style><class name="error"/></style>
+                  </object>
+                </child>
+
                 <child>
                   <object class="AdwToastOverlay" id="toast_overlay">
                     <child>

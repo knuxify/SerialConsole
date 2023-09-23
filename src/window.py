@@ -20,12 +20,15 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     split_view = Gtk.Template.Child()
     sidebar = Gtk.Template.Child()
     terminal = Gtk.Template.Child()
+
+    reconnecting_banner = Gtk.Template.Child()
     toast_overlay = Gtk.Template.Child()
 
     console_header = Gtk.Template.Child()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.reconnect_thread = None
 
         self.get_application().get_style_manager().connect(
             'notify::dark', self.theme_change_callback
@@ -41,8 +44,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
         self.ports = Gtk.StringList()
         self.get_available_ports()
-        self.port_update_thread = threading.Thread(target=self.port_update_loop, daemon=True)
-        self.port_update_thread.start()
+        GLib.timeout_add(1000, self.get_available_ports)
 
         self.logger = SerialLogger(self.serial)
         self.logger.connect('log-open-failure', self.on_log_open_failure)
@@ -61,7 +63,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
     # Port update functions
 
-    def get_available_ports(self):
+    def get_available_ports(self, *args):
         ports = sorted([port[0] for port in serial.tools.list_ports.comports()])
         self.sidebar._ignore_port_change = True
         copy_list_to_stringlist(ports, self.ports)
@@ -79,10 +81,34 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         if not self.serial.is_open:
             self.sidebar.open_button.set_sensitive(bool(ports))
 
-    def port_update_loop(self):
-        while True:
-            GLib.idle_add(self.get_available_ports)
-            time.sleep(1)
+        return True
+
+    def reconnect_loop(self):
+        """Awaits for the currently opened device to come back online."""
+        self.reconnecting_banner.set_revealed(True)
+        while not self.serial.is_open:
+            if self.serial._force_close:
+                self.serial._connection_lost = False
+                self.reconnect_thread = None
+                GLib.idle_add(self.sidebar.update_open_button)
+                self.reconnecting_banner.set_revealed(False)
+                return
+
+            if self.serial.port in [p.get_string() for p in self.ports]:
+                break
+
+            time.sleep(1.25)
+        self.reconnecting_banner.set_revealed(False)
+        self.serial._connection_lost = False
+        self.reconnect_thread = None
+        GLib.idle_add(self.serial.open)
+
+    def start_reconnect_thread(self):
+        self.get_available_ports()
+        if self.reconnect_thread:
+            return
+        self.reconnect_thread = threading.Thread(target=self.reconnect_loop, daemon=True)
+        self.reconnect_thread.start()
 
     # Console handling functions
 
@@ -137,6 +163,7 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     def theme_change_callback(self, *args):
         GLib.idle_add(self.set_terminal_color_scheme)
 
+
 @Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/settings-pane.ui')
 class SerialBowlSettingsPane(Gtk.Box):
     __gtype_name__ = 'SerialBowlSettingsPane'
@@ -166,7 +193,6 @@ class SerialBowlSettingsPane(Gtk.Box):
 
     def __init__(self):
         super().__init__()
-        self.reconnect_thread = None
         self._ignore_port_change = False
         self._needs_setup = True
         self.custom_scrollback_spinbutton.set_range(0, 10000000)
@@ -368,38 +394,17 @@ class SerialBowlSettingsPane(Gtk.Box):
             # Handle lost connection
             if self.serial._connection_lost:
                 if config['reconnect-automatically']:
-                    self.start_reconnect_thread()
+                    self.get_native().start_reconnect_thread()
                     return
                 else:
                     self.serial._connection_lost = False
+                    self.toast_overlay.add_toast(
+                        Adw.Toast.new(_("Connection to serial port lost"))
+                    )
 
             self.open_button.set_sensitive(bool(self.ports.get_n_items()))
             self.close_button.set_sensitive(False)
             self.open_button_switcher.set_visible_child(self.open_button)
-
-    def reconnect_loop(self):
-        """Awaits for the currently opened device to come back online."""
-        while not self.serial.is_open:
-            if self.serial._force_close:
-                self.serial._connection_lost = False
-                self.reconnect_thread = None
-                GLib.idle_add(self.update_open_button)
-                return
-
-            if self.serial.port in [p.get_string() for p in self.ports]:
-                break
-
-            time.sleep(1.25)
-        self.serial._connection_lost = False
-        self.reconnect_thread = None
-        GLib.idle_add(self.serial.open)
-
-    def start_reconnect_thread(self):
-        self.get_native().get_available_ports()
-        if self.reconnect_thread:
-            return
-        self.reconnect_thread = threading.Thread(target=self.reconnect_loop, daemon=True)
-        self.reconnect_thread.start()
 
     @Gtk.Template.Callback()
     def open_serial(self, *args):
