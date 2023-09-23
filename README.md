@@ -2,8 +2,35 @@
 
 Access any serial console
 
-## Call for contributors
+![Screenshot](data/screenshot.png)
 
-**NOTE**: This has not been thoroughly tested! My only use case for a serial console is using it read-only (*sometimes* write-only) through a UART dongle. I make no guarantee that it will work on any other hardware!
+## Dependencies
 
-If you own any other serial devices, and would like to contribute, feel free to do so! Even opening an issue with your own suggestions is already very helpful.
+- Python >= 3.8
+- GTK4 >= 4.12.0
+- libadwaita >= 1.4.0
+- pygobject
+- [pyserial](https://pypi.org/project/pyserial/)
+
+## Building
+
+We use the meson build system. The build process is as follows:
+
+```
+meson output
+meson compile -C output
+meson install -C output
+```
+
+For development purposes, this is automated in the provided `run` script.
+
+### Commit style
+
+**Please follow the following commit style:**
+
+ - All commits have a prefix that contains the area of the code that has been changed:
+   - For the README.md file, build files (meson.build) and things like .gitignore, this is `meta:`
+   - For anything in the data directory, this is `data:`
+   - For anything related to translations or the po directory, this is `po:`
+   - For the actual code, this is the filename of the main file you've edited, e.g. `fileview:`
+ - Commit messages are in all lowercase, except for class names, filenames (if they're capitalized - like README, COPYING etc.) and project names (e.g. Musicbrainz).
