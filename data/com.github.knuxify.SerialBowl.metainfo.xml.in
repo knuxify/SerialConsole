@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <!-- TRANSLATORS: Do not translate or transliterate the name of the program (Serial Bowl). For this string, just copy the existing contents, -->
+  <!-- TRANSLATORS: Do not translate or transliterate the name of the program (Serial Bowl). For this string, just copy the existing contents. -->
   <name>Serial Bowl</name>
   <!-- TRANSLATORS: App description. -->
   <summary>Access any serial console</summary>
@@ -10,7 +10,7 @@
 
   <launchable type="desktop-id">com.github.knuxify.SerialBowl.desktop</launchable>
 
-  <translation type="gettext">com.github.knuxify.SerialBowl.EarTag</translation>
+  <translation type="gettext">com.github.knuxify.SerialBowl</translation>
 
   <content_rating type="oars-1.1"/>
 
@@ -30,8 +30,8 @@
     </release>
   </releases>
 
-  <url type="homepage">https://gitlab.gnome.org/World/eartag</url>
-  <url type="bugtracker">https://gitlab.gnome.org/World/eartag/-/issues</url>
+  <url type="homepage">https://github.com/knuxify/SerialBowl</url>
+  <url type="bugtracker">https://github.com/knuxify/SerialBowl/issues</url>
 
   <categories>
     <category>Utility</category>
