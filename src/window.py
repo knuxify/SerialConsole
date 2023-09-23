@@ -56,6 +56,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         except (TypeError, ValueError, OverflowError):
             pass
 
+        if not self.serial.port and ports:
+            self.serial.port = ports[0]
+
         if not self.serial.is_open:
             self.sidebar.open_button.set_sensitive(bool(ports))
 
