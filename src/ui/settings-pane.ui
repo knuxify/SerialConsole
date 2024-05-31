@@ -22,27 +22,7 @@
 
                 <child>
                   <object class="AdwPreferencesGroup" id="settings_box">
-                    <property name="title" translatable="yes">Connection</property>
-
-                    <property name="header-suffix">
-                      <object class="GtkStack" id="open_button_switcher">
-                        <child>
-                          <object class="GtkButton" id="open_button">
-                            <property name="label" translatable="yes">Open</property>
-                            <style><class name="suggested-action"/></style>
-                            <signal name="clicked" handler="open_serial"/>
-                          </object>
-                        </child>
-
-                        <child>
-                          <object class="GtkButton" id="close_button">
-                            <property name="label" translatable="yes">Close</property>
-                            <style><class name="destructive-action"/></style>
-                            <signal name="clicked" handler="close_serial"/>
-                          </object>
-                        </child>
-                      </object>
-                    </property>
+                    <!--<property name="title" translatable="yes">Connection</property>-->
 
                     <child>
                       <object class="AdwComboRow" id="port_selector">
@@ -170,7 +150,8 @@
 
                     <child>
                       <object class="AdwSwitchRow" id="local_echo_toggle">
-                        <property name="title" translatable="yes">Enable local echo</property>
+                        <property name="title" translatable="yes">Local echo</property>
+                        <property name="subtitle" translatable="yes">Print out inputted text</property>
                       </object>
                     </child>
                   </object>
@@ -196,7 +177,7 @@
 
                     <child>
                       <object class="AdwSwitchRow" id="log_binary_toggle">
-                        <property name="title" translatable="yes">Write raw binary data to log file</property>
+                        <property name="title" translatable="yes">Write raw binary data</property>
                       </object>
                     </child>
                   </object>

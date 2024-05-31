@@ -29,6 +29,10 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     sidebar = Gtk.Template.Child()
     terminal = Gtk.Template.Child()
 
+    open_button_switcher = Gtk.Template.Child()
+    open_button = Gtk.Template.Child()
+    close_button = Gtk.Template.Child()
+
     reconnecting_banner = Gtk.Template.Child()
     toast_overlay = Gtk.Template.Child()
 
@@ -52,7 +56,6 @@ class SerialBowlWindow(Adw.ApplicationWindow):
             "reconnect-automatically",
             GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
         )
-        self.handle_state_change(self.serial)
 
         self.ports = Gtk.StringList()
         self.get_available_ports()
@@ -62,6 +65,8 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         self.logger.connect("log-open-failure", self.on_log_open_failure)
 
         self.connect("close-request", self.on_close)
+
+        self.handle_state_change(self.serial)
 
     def on_close(self, *args):
         self.serial.close()
@@ -93,14 +98,38 @@ class SerialBowlWindow(Adw.ApplicationWindow):
             self.serial.port = ports[0]
 
         if self.serial.state == SerialHandlerState.CLOSED:
-            self.sidebar.open_button.set_sensitive(bool(ports))
+            self.open_button.set_sensitive(bool(ports))
 
         return True
 
     def handle_state_change(self, serial, *args):
         state = serial.props.state
+
+        # Toggle "reconnecting" banner
         self.reconnecting_banner.set_revealed(state == SerialHandlerState.RECONNECTING)
+        # Toggle terminal sensitivity
         self.terminal.props.sensitive = (state == SerialHandlerState.OPEN)
+
+        # Update open button
+        if state != SerialHandlerState.CLOSED:
+            self.open_button.set_sensitive(False)
+            self.close_button.set_sensitive(True)
+            self.open_button_switcher.set_visible_child(self.close_button)
+        else:
+            self.open_button.set_sensitive(bool(self.ports.get_n_items()))
+            self.close_button.set_sensitive(False)
+            self.open_button_switcher.set_visible_child(self.open_button)
+
+    @Gtk.Template.Callback()
+    def open_serial(self, *args):
+        self.open_button.set_sensitive(False)
+        self.serial.open()
+
+    @Gtk.Template.Callback()
+    def close_serial(self, *args):
+        self.serial._force_close = True
+        self.close_button.set_sensitive(False)
+        self.serial.close()
 
     # Console handling functions
 
@@ -158,10 +187,6 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 class SerialBowlSettingsPane(Gtk.Box):
     __gtype_name__ = "SerialBowlSettingsPane"
 
-    open_button_switcher = Gtk.Template.Child()
-    open_button = Gtk.Template.Child()
-    close_button = Gtk.Template.Child()
-
     reconnect_automatically = Gtk.Template.Child()
 
     port_selector = Gtk.Template.Child()
@@ -203,7 +228,6 @@ class SerialBowlSettingsPane(Gtk.Box):
             return
 
         self.serial = self.get_native().serial
-        self.serial.connect("notify::state", self.update_open_button)
 
         self.ports = self.get_native().ports
         self.port_selector.set_model(self.ports)
@@ -220,8 +244,6 @@ class SerialBowlSettingsPane(Gtk.Box):
             "notify::state", lambda *args: self.notify("port-display")
         )
 
-        self.update_open_button()
-
         self.setup_settings_bindings()
 
         self._needs_setup = False
@@ -232,7 +254,7 @@ class SerialBowlSettingsPane(Gtk.Box):
             return self.serial.port
 
         # TRANSLATORS: Default window caption when no console is connected
-        return _("(no connection)")
+        return _("(Not connected)")
 
     def setup_settings_bindings(self):
         config.bind(
@@ -393,27 +415,6 @@ class SerialBowlSettingsPane(Gtk.Box):
     @flow_control_str.setter
     def flow_control_str(self, value):
         self.serial.flow_control = from_enum_str(FlowControl, value)
-
-    def update_open_button(self, *args):
-        if self.serial.props.state != SerialHandlerState.CLOSED:
-            self.open_button.set_sensitive(False)
-            self.close_button.set_sensitive(True)
-            self.open_button_switcher.set_visible_child(self.close_button)
-        else:
-            self.open_button.set_sensitive(bool(self.ports.get_n_items()))
-            self.close_button.set_sensitive(False)
-            self.open_button_switcher.set_visible_child(self.open_button)
-
-    @Gtk.Template.Callback()
-    def open_serial(self, *args):
-        self.open_button.set_sensitive(False)
-        self.serial.open()
-
-    @Gtk.Template.Callback()
-    def close_serial(self, *args):
-        self.serial._force_close = True
-        self.close_button.set_sensitive(False)
-        self.serial.close()
 
     @Gtk.Template.Callback()
     def set_port_from_selector(self, selector, *args):
