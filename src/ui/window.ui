@@ -35,17 +35,19 @@
                       <object class="GtkStack" id="open_button_switcher">
                         <child>
                           <object class="GtkButton" id="open_button">
-                            <property name="label" translatable="yes">Open</property>
+                            <property name="label" translatable="yes">Connect</property>
                             <style><class name="suggested-action"/></style>
                             <signal name="clicked" handler="open_serial"/>
+                            <property name="halign">start</property>
                           </object>
                         </child>
 
                         <child>
                           <object class="GtkButton" id="close_button">
-                            <property name="label" translatable="yes">Close</property>
+                            <property name="label" translatable="yes">Disconnect</property>
                             <style><class name="destructive-action"/></style>
                             <signal name="clicked" handler="close_serial"/>
+                            <property name="halign">start</property>
                           </object>
                         </child>
                       </object>
