@@ -6,7 +6,7 @@ from gi.repository import GLib, GObject, Gio
 import os
 
 from .config import config
-
+from .serial import SerialHandlerState
 
 class SerialLogger(GObject.Object):
     """Handles logging for the serial file."""
@@ -17,7 +17,7 @@ class SerialLogger(GObject.Object):
 
         self.serial = serial
         self.serial.connect("read_done", self.serial_read)
-        self.serial.connect("notify::is-open", self.start_flush_timeout)
+        self.serial.connect("notify::state", self.start_flush_timeout)
 
         config.bind("log-path", self, "log-path", flags=Gio.SettingsBindFlags.DEFAULT)
         config.connect("changed::log-binary", self.reopen_log)
@@ -75,7 +75,7 @@ class SerialLogger(GObject.Object):
                 self._file.flush()
             except ValueError:
                 pass
-        return self.serial.is_open
+        return self.serial.state == SerialHandlerState.CLOSED
 
     def open_log(self):
         """Opens the logfile."""
@@ -101,5 +101,5 @@ class SerialLogger(GObject.Object):
             self.open_log()
 
     def start_flush_timeout(self, *args):
-        if self.serial.is_open:
+        if self.serial.state == SerialHandlerState.OPEN:
             GLib.timeout_add(1000, self.flush_log)

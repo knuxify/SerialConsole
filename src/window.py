@@ -17,7 +17,7 @@ from .config import (
     enum_to_stringlist,
 )
 from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
-from .serial import SerialHandler
+from .serial import SerialHandler, SerialHandlerState
 from .logger import SerialLogger
 
 
@@ -45,9 +45,14 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
         self.serial = SerialHandler()
         self.serial.connect("read_done", self.terminal_read)
-        self.serial.bind_property(
-            "is-open", self.terminal, "sensitive", GObject.BindingFlags.SYNC_CREATE
+        self.serial.connect("notify::state", self.handle_state_change)
+        self.sidebar.reconnect_automatically.bind_property(
+            "active",
+            self.serial,
+            "reconnect-automatically",
+            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
         )
+        self.handle_state_change(self.serial)
 
         self.ports = Gtk.StringList()
         self.get_available_ports()
@@ -87,39 +92,15 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         if not self.serial.port and ports:
             self.serial.port = ports[0]
 
-        if not self.serial.is_open:
+        if self.serial.state == SerialHandlerState.CLOSED:
             self.sidebar.open_button.set_sensitive(bool(ports))
 
         return True
 
-    def reconnect_loop(self):
-        """Awaits for the currently opened device to come back online."""
-        self.reconnecting_banner.set_revealed(True)
-        while not self.serial.is_open:
-            if self.serial._force_close:
-                self.serial._connection_lost = False
-                self.reconnect_thread = None
-                GLib.idle_add(self.sidebar.update_open_button)
-                self.reconnecting_banner.set_revealed(False)
-                return
-
-            if self.serial.port in [p.get_string() for p in self.ports]:
-                break
-
-            time.sleep(1.25)
-        self.reconnecting_banner.set_revealed(False)
-        self.serial._connection_lost = False
-        self.reconnect_thread = None
-        GLib.idle_add(self.serial.open)
-
-    def start_reconnect_thread(self):
-        self.get_available_ports()
-        if self.reconnect_thread:
-            return
-        self.reconnect_thread = threading.Thread(
-            target=self.reconnect_loop, daemon=True
-        )
-        self.reconnect_thread.start()
+    def handle_state_change(self, serial, *args):
+        state = serial.props.state
+        self.reconnecting_banner.set_revealed(state == SerialHandlerState.RECONNECTING)
+        self.terminal.props.sensitive = (state == SerialHandlerState.OPEN)
 
     # Console handling functions
 
@@ -222,7 +203,7 @@ class SerialBowlSettingsPane(Gtk.Box):
             return
 
         self.serial = self.get_native().serial
-        self.serial.connect("notify::is-open", self.update_open_button)
+        self.serial.connect("notify::state", self.update_open_button)
 
         self.ports = self.get_native().ports
         self.port_selector.set_model(self.ports)
@@ -236,7 +217,7 @@ class SerialBowlSettingsPane(Gtk.Box):
         )
         self.serial.connect("notify::port", lambda *args: self.notify("port-display"))
         self.serial.connect(
-            "notify::is-open", lambda *args: self.notify("port-display")
+            "notify::state", lambda *args: self.notify("port-display")
         )
 
         self.update_open_button()
@@ -247,7 +228,11 @@ class SerialBowlSettingsPane(Gtk.Box):
 
     @GObject.Property(type=str)
     def port_display(self):
-        return self.serial.port if self.serial.is_open else _("(no connection)")
+        if self.serial.state != SerialHandlerState.CLOSED:
+            return self.serial.port
+
+        # TRANSLATORS: Default window caption when no console is connected
+        return _("(no connection)")
 
     def setup_settings_bindings(self):
         config.bind(
@@ -410,22 +395,11 @@ class SerialBowlSettingsPane(Gtk.Box):
         self.serial.flow_control = from_enum_str(FlowControl, value)
 
     def update_open_button(self, *args):
-        if self.serial.is_open:
+        if self.serial.props.state != SerialHandlerState.CLOSED:
             self.open_button.set_sensitive(False)
             self.close_button.set_sensitive(True)
             self.open_button_switcher.set_visible_child(self.close_button)
         else:
-            # Handle lost connection
-            if self.serial._connection_lost:
-                if config["reconnect-automatically"]:
-                    self.get_native().start_reconnect_thread()
-                    return
-                else:
-                    self.serial._connection_lost = False
-                    self.get_native().toast_overlay.add_toast(
-                        Adw.Toast.new(_("Connection to serial port lost"))
-                    )
-
             self.open_button.set_sensitive(bool(self.ports.get_n_items()))
             self.close_button.set_sensitive(False)
             self.open_button_switcher.set_visible_child(self.open_button)
