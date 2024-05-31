@@ -56,17 +56,19 @@ class SerialLogger(GObject.Object):
         self.open_log()
 
     def serial_read(self, serial, data, *args):
-        if config['log-binary']:
-            self._file.write(data.get_data())
-        else:
-            self._file.write(data.get_data().decode('utf-8'))
+        if self._file:
+            if config['log-binary']:
+                self._file.write(data.get_data())
+            else:
+                self._file.write(data.get_data().decode('utf-8'))
 
     def write_text(self, text):
         """Writes text to the log file."""
-        if config['log-binary']:
-            self._file.write(bytes(text, 'utf-8'))
-        else:
-            self._file.write(text)
+        if self._file:
+            if config['log-binary']:
+                self._file.write(bytes(text, 'utf-8'))
+            else:
+                self._file.write(text)
 
     def flush_log(self, *args):
         """Flushes the logfile."""
