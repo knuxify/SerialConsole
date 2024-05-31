@@ -399,7 +399,7 @@ class SerialBowlSettingsPane(Gtk.Box):
                     return
                 else:
                     self.serial._connection_lost = False
-                    self.toast_overlay.add_toast(
+                    self.get_native().toast_overlay.add_toast(
                         Adw.Toast.new(_("Connection to serial port lost"))
                     )
 
