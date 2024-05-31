@@ -58,7 +58,10 @@ class SerialLogger(GObject.Object):
             if config["log-binary"]:
                 self._file.write(data.get_data())
             else:
-                self._file.write(data.get_data().decode("utf-8"))
+                try:
+                    self._file.write(data.get_data().decode("utf-8"))
+                except UnicodeDecodeError:
+                    self._file.write("�")
 
     def write_text(self, text):
         """Writes text to the log file."""
