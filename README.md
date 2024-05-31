@@ -6,9 +6,9 @@ Access any serial console
 
 ## Dependencies
 
-- Python >= 3.8
-- GTK4 >= 4.12.0
-- libadwaita >= 1.4.0
+- Python >= 3.11
+- GTK4 >= 4.14.0
+- libadwaita >= 1.5.0
 - pygobject
 - [pyserial](https://pypi.org/project/pyserial/)
 
