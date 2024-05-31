@@ -8,14 +8,22 @@ import serial.tools.list_ports
 import time
 import threading
 
-from .config import config, Parity, FlowControl, to_enum_str, from_enum_str, enum_to_stringlist
+from .config import (
+    config,
+    Parity,
+    FlowControl,
+    to_enum_str,
+    from_enum_str,
+    enum_to_stringlist,
+)
 from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
 from .serial import SerialHandler
 from .logger import SerialLogger
 
-@Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/window.ui')
+
+@Gtk.Template(resource_path="/com/github/knuxify/SerialBowl/ui/window.ui")
 class SerialBowlWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'SerialBowlWindow'
+    __gtype_name__ = "SerialBowlWindow"
 
     split_view = Gtk.Template.Child()
     sidebar = Gtk.Template.Child()
@@ -31,15 +39,14 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         self.reconnect_thread = None
 
         self.get_application().get_style_manager().connect(
-            'notify::dark', self.theme_change_callback
+            "notify::dark", self.theme_change_callback
         )
         self.set_terminal_color_scheme()
 
         self.serial = SerialHandler()
-        self.serial.connect('read_done', self.terminal_read)
+        self.serial.connect("read_done", self.terminal_read)
         self.serial.bind_property(
-            'is-open', self.terminal, 'sensitive',
-            GObject.BindingFlags.SYNC_CREATE
+            "is-open", self.terminal, "sensitive", GObject.BindingFlags.SYNC_CREATE
         )
 
         self.ports = Gtk.StringList()
@@ -47,9 +54,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         GLib.timeout_add(1000, self.get_available_ports)
 
         self.logger = SerialLogger(self.serial)
-        self.logger.connect('log-open-failure', self.on_log_open_failure)
+        self.logger.connect("log-open-failure", self.on_log_open_failure)
 
-        self.connect('close-request', self.on_close)
+        self.connect("close-request", self.on_close)
 
     def on_close(self, *args):
         self.serial.close()
@@ -58,7 +65,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     def on_log_open_failure(self, *args):
         self.sidebar.log_enable_toggle.set_active(False)
         self.toast_overlay.add_toast(
-            Adw.Toast.new(_("Failed to open log file for writing; check the path and try again"))
+            Adw.Toast.new(
+                _("Failed to open log file for writing; check the path and try again")
+            )
         )
 
     # Port update functions
@@ -107,7 +116,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         self.get_available_ports()
         if self.reconnect_thread:
             return
-        self.reconnect_thread = threading.Thread(target=self.reconnect_loop, daemon=True)
+        self.reconnect_thread = threading.Thread(
+            target=self.reconnect_loop, daemon=True
+        )
         self.reconnect_thread.start()
 
     # Console handling functions
@@ -123,8 +134,8 @@ class SerialBowlWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def terminal_commit(self, terminal, text, size, *args):
         """Get input from the terminal and send it over serial."""
-        if config['echo']:
-            self.terminal.feed(bytes(text, 'utf-8'))
+        if config["echo"]:
+            self.terminal.feed(bytes(text, "utf-8"))
             self.logger.write_text(text)
         self.serial.write_text(text)
 
@@ -133,25 +144,23 @@ class SerialBowlWindow(Adw.ApplicationWindow):
 
     def terminal_write_message(self, text):
         """Writes an info message to the terminal."""
-        if config['disable-info-messages']:
+        if config["disable-info-messages"]:
             return
 
         if not self.terminal.get_text()[0].strip():
-            self.terminal.feed(
-                bytes(f'\r\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
-            )
+            self.terminal.feed(bytes(f"\r\033[0;90m--- {text} ---\r\n\033[0m", "utf-8"))
         else:
             self.terminal.feed(
-                bytes(f'\r\n\033[0;90m--- {text} ---\r\n\033[0m', 'utf-8')
+                bytes(f"\r\n\033[0;90m--- {text} ---\r\n\033[0m", "utf-8")
             )
 
-        self.logger.write_text(f'\r\n--- {text} ---')
+        self.logger.write_text(f"\r\n--- {text} ---")
 
     def set_terminal_color_scheme(self, *args):
         """Sets up a terminal color scheme from the default colors."""
         style = self.get_style_context()
-        bg = style.lookup_color('view_bg_color')[1]
-        fg = style.lookup_color('view_fg_color')[1]
+        bg = style.lookup_color("view_bg_color")[1]
+        fg = style.lookup_color("view_fg_color")[1]
         self.terminal.set_color_background(bg)
         self.terminal.set_color_foreground(fg)
 
@@ -164,9 +173,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         GLib.idle_add(self.set_terminal_color_scheme)
 
 
-@Gtk.Template(resource_path='/com/github/knuxify/SerialBowl/ui/settings-pane.ui')
+@Gtk.Template(resource_path="/com/github/knuxify/SerialBowl/ui/settings-pane.ui")
 class SerialBowlSettingsPane(Gtk.Box):
-    __gtype_name__ = 'SerialBowlSettingsPane'
+    __gtype_name__ = "SerialBowlSettingsPane"
 
     open_button_switcher = Gtk.Template.Child()
     open_button = Gtk.Template.Child()
@@ -200,9 +209,9 @@ class SerialBowlSettingsPane(Gtk.Box):
 
         # Only allow numbers to be typed into custom baud rate field
         self.custom_baudrate.set_input_purpose(Gtk.InputPurpose.DIGITS)
-        self.custom_baudrate.get_delegate().connect('insert-text', disallow_nonnumeric)
+        self.custom_baudrate.get_delegate().connect("insert-text", disallow_nonnumeric)
 
-        self.connect('realize', self._setup)
+        self.connect("realize", self._setup)
 
     def _setup(self, *args):
         """
@@ -213,18 +222,22 @@ class SerialBowlSettingsPane(Gtk.Box):
             return
 
         self.serial = self.get_native().serial
-        self.serial.connect('notify::is-open', self.update_open_button)
+        self.serial.connect("notify::is-open", self.update_open_button)
 
         self.ports = self.get_native().ports
         self.port_selector.set_model(self.ports)
 
         title = self.get_native().console_header.get_title_widget()
         self.bind_property(
-            'port_display', title, 'subtitle',
-            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE
+            "port_display",
+            title,
+            "subtitle",
+            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
         )
-        self.serial.connect('notify::port', lambda *args: self.notify('port-display'))
-        self.serial.connect('notify::is-open', lambda *args: self.notify('port-display'))
+        self.serial.connect("notify::port", lambda *args: self.notify("port-display"))
+        self.serial.connect(
+            "notify::is-open", lambda *args: self.notify("port-display")
+        )
 
         self.update_open_button()
 
@@ -234,13 +247,14 @@ class SerialBowlSettingsPane(Gtk.Box):
 
     @GObject.Property(type=str)
     def port_display(self):
-        return self.serial.port if self.serial.is_open else _('(no connection)')
+        return self.serial.port if self.serial.is_open else _("(no connection)")
 
     def setup_settings_bindings(self):
         config.bind(
-            'reconnect-automatically',
-            self.reconnect_automatically, 'active',
-            flags=Gio.SettingsBindFlags.DEFAULT
+            "reconnect-automatically",
+            self.reconnect_automatically,
+            "active",
+            flags=Gio.SettingsBindFlags.DEFAULT,
         )
 
         # baud-rate is not included here, as its selector is set up separately.
@@ -248,39 +262,38 @@ class SerialBowlSettingsPane(Gtk.Box):
         # selector" function (and it wouldn't be possible since we need to
         # convert from string to int first anyways).
         params = {
-            'port': ('selector', self.port_selector),
-            'data-bits': ('selector', self.data_bits_selector),
-            'stop-bits': ('selector', self.stop_bits_selector),
+            "port": ("selector", self.port_selector),
+            "data-bits": ("selector", self.data_bits_selector),
+            "stop-bits": ("selector", self.stop_bits_selector),
         }
 
         # Serial parameters are directly synced to config:
-        for property in ('port', 'baud-rate', 'data-bits', 'stop-bits'):
+        for property in ("port", "baud-rate", "data-bits", "stop-bits"):
 
-            if property == 'port':
+            if property == "port":
                 # For ports, there is no guarantee that the last used
                 # port will be available, so we set the available port
                 # if and only if it's actually available; otherwise we
                 # get the first item in the model.
                 ports = [p.get_string() for p in self.get_native().ports]
-                if config['port'] in ports:
-                    port = config['port']
+                if config["port"] in ports:
+                    port = config["port"]
                 elif ports:
                     port = ports[0]
-                    config['port'] = port
+                    config["port"] = port
                 else:
-                    port = ''
-                    config['port'] = port
+                    port = ""
+                    config["port"] = port
                 self.serial.port = port
             else:
                 self.serial.set_property(property, config[property])
 
             config.bind(
-                property, self.serial, property,
-                flags=Gio.SettingsBindFlags.DEFAULT
+                property, self.serial, property, flags=Gio.SettingsBindFlags.DEFAULT
             )
 
             if property in params:
-                if params[property][0] == 'selector':
+                if params[property][0] == "selector":
                     selector = params[property][1]
                     i = find_in_stringlist(selector.get_model(), str(config[property]))
                     if i < 0:
@@ -290,83 +303,93 @@ class SerialBowlSettingsPane(Gtk.Box):
         # Enum properties need to be handled separately, else they
         # end up syncing the *strings*, not the *IDs*:
         enums = {
-            'parity': (Parity, self.parity_selector),
-            'flow-control': (FlowControl, self.flow_control_selector),
+            "parity": (Parity, self.parity_selector),
+            "flow-control": (FlowControl, self.flow_control_selector),
         }
 
-        for property in ('parity', 'flow-control'):
+        for property in ("parity", "flow-control"):
             self.serial.set_property(property, config.get_enum(property))
 
             config.bind(
-                property, self, property + '-str',
-                flags=Gio.SettingsBindFlags.DEFAULT
+                property, self, property + "-str", flags=Gio.SettingsBindFlags.DEFAULT
             )
 
             selector = enums[property][1]
             selector.set_model(enum_to_stringlist(enums[property][0]))
             selector.bind_property(
-                'selected', self.serial, property,
-                GObject.BindingFlags.BIDIRECTIONAL
+                "selected", self.serial, property, GObject.BindingFlags.BIDIRECTIONAL
             )
             selector.set_selected(config.get_enum(property))
-            self.serial.connect('notify::' + property, lambda *args: self.notify(property + '-str'))
+            self.serial.connect(
+                "notify::" + property, lambda *args: self.notify(property + "-str")
+            )
 
         # Set up baud rate selector
         baudrate_model = self.baudrate_selector.get_model()
         for i in range(baudrate_model.get_n_items()):
             rate = baudrate_model.get_item(i).get_string()
             try:
-                if int(rate) == config['baud-rate']:
+                if int(rate) == config["baud-rate"]:
                     self.baudrate_selector.set_selected(i)
                     break
             except ValueError:  # custom
-                self.custom_baudrate.set_text(str(config['baud-rate']))
+                self.custom_baudrate.set_text(str(config["baud-rate"]))
                 self.baudrate_selector.set_selected(i)
 
         # Terminal settings
         config.bind(
-            'scrollback',
-            self.custom_scrollback_spinbutton, 'value',
-            flags=Gio.SettingsBindFlags.DEFAULT
+            "scrollback",
+            self.custom_scrollback_spinbutton,
+            "value",
+            flags=Gio.SettingsBindFlags.DEFAULT,
         )
         config.bind(
-            'unlimited-scrollback',
-            self.unlimited_scrollback_toggle, 'active',
-            flags=Gio.SettingsBindFlags.DEFAULT
+            "unlimited-scrollback",
+            self.unlimited_scrollback_toggle,
+            "active",
+            flags=Gio.SettingsBindFlags.DEFAULT,
         )
-        self.custom_scrollback_spinbutton.connect('value-changed', self.update_scrollback_from_pane)
-        self.unlimited_scrollback_toggle.connect('notify::active', self.update_scrollback_from_pane)
+        self.custom_scrollback_spinbutton.connect(
+            "value-changed", self.update_scrollback_from_pane
+        )
+        self.unlimited_scrollback_toggle.connect(
+            "notify::active", self.update_scrollback_from_pane
+        )
         self.update_scrollback_from_pane()
 
         config.bind(
-            'disable-info-messages',
-            self.disable_info_messages_toggle, 'active',
-            flags=Gio.SettingsBindFlags.DEFAULT
+            "disable-info-messages",
+            self.disable_info_messages_toggle,
+            "active",
+            flags=Gio.SettingsBindFlags.DEFAULT,
         )
 
         config.bind(
-            'echo', self.local_echo_toggle, 'active',
-            flags=Gio.SettingsBindFlags.DEFAULT
+            "echo",
+            self.local_echo_toggle,
+            "active",
+            flags=Gio.SettingsBindFlags.DEFAULT,
         )
 
         # Logging settings
         config.bind(
-            'log-enable',
-            self.log_enable_toggle, 'active',
-            flags=Gio.SettingsBindFlags.DEFAULT
+            "log-enable",
+            self.log_enable_toggle,
+            "active",
+            flags=Gio.SettingsBindFlags.DEFAULT,
         )
 
-        self.log_path_entry.set_text(config['log-path'])
-        self.log_path_entry.connect('apply', self.set_log_path_from_pane)
+        self.log_path_entry.set_text(config["log-path"])
+        self.log_path_entry.connect("apply", self.set_log_path_from_pane)
 
     def set_log_path_from_pane(self, *args):
-        config['log-path'] = self.log_path_entry.get_text()
+        config["log-path"] = self.log_path_entry.get_text()
 
     def update_scrollback_from_pane(self, *args):
-        if config['unlimited-scrollback']:
+        if config["unlimited-scrollback"]:
             self.get_native().terminal.set_scrollback_lines(-1)
         else:
-            self.get_native().terminal.set_scrollback_lines(config['scrollback'])
+            self.get_native().terminal.set_scrollback_lines(config["scrollback"])
 
     @GObject.Property(type=str)
     def parity_str(self):
@@ -394,7 +417,7 @@ class SerialBowlSettingsPane(Gtk.Box):
         else:
             # Handle lost connection
             if self.serial._connection_lost:
-                if config['reconnect-automatically']:
+                if config["reconnect-automatically"]:
                     self.get_native().start_reconnect_thread()
                     return
                 else:

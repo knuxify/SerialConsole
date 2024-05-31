@@ -13,7 +13,7 @@ def disallow_nonnumeric(entry, text, length, position, *args):
     if not text:
         return
     if not text.isdigit():
-        GObject.signal_stop_emission_by_name(entry, 'insert-text')
+        GObject.signal_stop_emission_by_name(entry, "insert-text")
 
 
 def find_in_stringlist(model, item: str):

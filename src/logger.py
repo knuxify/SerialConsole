@@ -7,6 +7,7 @@ import os
 
 from .config import config
 
+
 class SerialLogger(GObject.Object):
     """Handles logging for the serial file."""
 
@@ -18,11 +19,8 @@ class SerialLogger(GObject.Object):
         self.serial.connect("read_done", self.serial_read)
         self.serial.connect("notify::is-open", self.start_flush_timeout)
 
-        config.bind(
-            'log-path', self, 'log-path',
-            flags=Gio.SettingsBindFlags.DEFAULT
-        )
-        config.connect('changed::log-binary', self.reopen_log)
+        config.bind("log-path", self, "log-path", flags=Gio.SettingsBindFlags.DEFAULT)
+        config.connect("changed::log-binary", self.reopen_log)
 
     @GObject.Signal
     def log_open_failure(self):
@@ -45,11 +43,11 @@ class SerialLogger(GObject.Object):
                 try:
                     os.makedirs(basedir)
                 except:  # noqa: E722
-                    self.emit('log-open-failure')
+                    self.emit("log-open-failure")
                     return
 
         if os.path.isdir(value):
-            self.emit('log-open-failure')
+            self.emit("log-open-failure")
             return
 
         self.close_log()
@@ -57,16 +55,16 @@ class SerialLogger(GObject.Object):
 
     def serial_read(self, serial, data, *args):
         if self._file:
-            if config['log-binary']:
+            if config["log-binary"]:
                 self._file.write(data.get_data())
             else:
-                self._file.write(data.get_data().decode('utf-8'))
+                self._file.write(data.get_data().decode("utf-8"))
 
     def write_text(self, text):
         """Writes text to the log file."""
         if self._file:
-            if config['log-binary']:
-                self._file.write(bytes(text, 'utf-8'))
+            if config["log-binary"]:
+                self._file.write(bytes(text, "utf-8"))
             else:
                 self._file.write(text)
 
@@ -82,12 +80,12 @@ class SerialLogger(GObject.Object):
     def open_log(self):
         """Opens the logfile."""
         try:
-            if config['log-binary']:
-                self._file = open(self._path, 'a+b')
+            if config["log-binary"]:
+                self._file = open(self._path, "a+b")
             else:
-                self._file = open(self._path, 'a+')
+                self._file = open(self._path, "a+")
         except:  # noqa: E722
-            self.emit('log-open-failure')
+            self.emit("log-open-failure")
             return
 
     def close_log(self, *args):
