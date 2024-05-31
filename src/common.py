@@ -5,7 +5,7 @@ Common utility functions.
 from gi.repository import GObject
 
 
-def disallow_nonnumeric(self, entry, text, length, position, *args):
+def disallow_nonnumeric(entry, text, length, position, *args):
     """
     Handler for GtkEditable insert-text call that only allows numeric
     values to be entered.
