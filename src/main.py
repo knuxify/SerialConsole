@@ -40,7 +40,7 @@ class Application(Adw.Application):
         return action
 
     def on_about_action(self, widget, _):
-        about = Adw.AboutWindow(
+        about = Adw.AboutDialog(
             application_name="Serial Bowl",
             application_icon="com.github.knuxify.SerialBowl",
             developers=["knuxify"],
@@ -54,10 +54,7 @@ class Application(Adw.Application):
             # TRANSLATORS: Add your name/nickname here
             about.props.translator_credits = self._('translator-credits')
 
-        about.set_modal(True)
-        about.set_transient_for(self.props.active_window)
-
-        about.present()
+        about.present(self.props.active_window)
 
     def on_quit_action(self, *args):
         win = self.props.active_window
