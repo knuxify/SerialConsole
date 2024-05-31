@@ -4,4 +4,4 @@ rm -r /tmp/sb
 meson --prefix=/tmp/sb . output
 meson compile -C output
 meson install -C output
-GSETTINGS_SCHEMA_DIR=/tmp/sb/share/glib-2.0/schemas GTK_DEBUG=interactive /tmp/sb/bin/serialbowl
+GSETTINGS_SCHEMA_DIR=/tmp/sb/share/glib-2.0/schemas /tmp/sb/bin/serialbowl
