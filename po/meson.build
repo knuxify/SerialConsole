@@ -1,1 +1,1 @@
-i18n.gettext('com.github.knuxify.SerialBowl', preset: 'glib')
+i18n.gettext('com.github.knuxify.SerialConsole', preset: 'glib')

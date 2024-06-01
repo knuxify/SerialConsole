@@ -10,14 +10,14 @@ gi.require_version("Vte", "3.91")
 
 from gi.repository import Adw, Gtk, Gio  # noqa: E402
 
-from .window import SerialBowlWindow  # noqa: E402
+from .window import SerialConsoleWindow  # noqa: E402
 
 
 class Application(Adw.Application):
     def __init__(self, version="dev"):
         super().__init__(
-            application_id="com.github.knuxify.SerialBowl",
-            resource_base_path="/com/github/knuxify/SerialBowl",
+            application_id="com.github.knuxify.SerialConsole",
+            resource_base_path="/com/github/knuxify/SerialConsole",
             flags=Gio.ApplicationFlags.HANDLES_OPEN,
         )
         self.version = version
@@ -26,7 +26,7 @@ class Application(Adw.Application):
     def do_activate(self):
         win = self.props.active_window
         if not win:
-            win = SerialBowlWindow(application=self)
+            win = SerialConsoleWindow(application=self)
         self.create_action("about", self.on_about_action, None)
         self.create_action("quit", self.on_quit_action, "<Ctrl>q")
 
@@ -44,13 +44,13 @@ class Application(Adw.Application):
 
     def on_about_action(self, widget, _):
         about = Adw.AboutDialog(
-            application_name="Serial Bowl",
-            application_icon="com.github.knuxify.SerialBowl",
+            application_name="Serial Console",
+            application_icon="com.github.knuxify.SerialConsole",
             developers=["knuxify"],
             license_type=Gtk.License.MIT_X11,
-            issue_url="https://github.com/knuxify/serialbowl",
+            issue_url="https://github.com/knuxify/serialconsole",
             version=self.version,
-            website="https://github.com/knuxify/serialbowl",
+            website="https://github.com/knuxify/serialconsole",
         )
 
         if self._("translator-credits") != "translator-credits":

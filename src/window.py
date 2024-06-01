@@ -21,9 +21,9 @@ from .serial import SerialHandler, SerialHandlerState
 from .logger import SerialLogger
 
 
-@Gtk.Template(resource_path="/com/github/knuxify/SerialBowl/ui/window.ui")
-class SerialBowlWindow(Adw.ApplicationWindow):
-    __gtype_name__ = "SerialBowlWindow"
+@Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/window.ui")
+class SerialConsoleWindow(Adw.ApplicationWindow):
+    __gtype_name__ = "SerialConsoleWindow"
 
     split_view = Gtk.Template.Child()
     sidebar = Gtk.Template.Child()
@@ -183,9 +183,9 @@ class SerialBowlWindow(Adw.ApplicationWindow):
         GLib.idle_add(self.set_terminal_color_scheme)
 
 
-@Gtk.Template(resource_path="/com/github/knuxify/SerialBowl/ui/settings-pane.ui")
-class SerialBowlSettingsPane(Gtk.Box):
-    __gtype_name__ = "SerialBowlSettingsPane"
+@Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/settings-pane.ui")
+class SerialConsoleSettingsPane(Gtk.Box):
+    __gtype_name__ = "SerialConsoleSettingsPane"
 
     reconnect_automatically = Gtk.Template.Child()
 

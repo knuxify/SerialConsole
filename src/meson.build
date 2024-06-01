@@ -1,9 +1,9 @@
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), meson.project_name())
-moduledir = join_paths(pkgdatadir, 'serialbowl')
+moduledir = join_paths(pkgdatadir, 'serialconsole')
 gnome = import('gnome')
 
-gnome.compile_resources('serialbowl',
-  'serialbowl.gresource.xml',
+gnome.compile_resources('serialconsole',
+  'serialconsole.gresource.xml',
   gresource_bundle: true,
   install: true,
   install_dir: pkgdatadir,
@@ -18,14 +18,14 @@ conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
 conf.set('pkgdatadir', pkgdatadir)
 
 configure_file(
-  input: 'serialbowl.in',
-  output: 'serialbowl',
+  input: 'serialconsole.in',
+  output: 'serialconsole',
   configuration: conf,
   install: true,
   install_dir: get_option('bindir')
 )
 
-serialbowl_sources = [
+serialconsole_sources = [
   '__init__.py',
   'config.py',
   'common.py',
@@ -35,4 +35,4 @@ serialbowl_sources = [
   'window.py',
 ]
 
-install_data(serialbowl_sources, install_dir: moduledir)
+install_data(serialconsole_sources, install_dir: moduledir)

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <!-- TRANSLATORS: Do not translate or transliterate the name of the program (Serial Bowl). For this string, just copy the existing contents. -->
-  <name>Serial Bowl</name>
+  <name>Serial Console</name>
   <!-- TRANSLATORS: App description. -->
   <summary>Access any serial console</summary>
-  <id>com.github.knuxify.SerialBowl</id>
+  <id>com.github.knuxify.SerialConsole</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
 
-  <launchable type="desktop-id">com.github.knuxify.SerialBowl.desktop</launchable>
+  <launchable type="desktop-id">com.github.knuxify.SerialConsole.desktop</launchable>
 
-  <translation type="gettext">com.github.knuxify.SerialBowl</translation>
+  <translation type="gettext">com.github.knuxify.SerialConsole</translation>
 
   <content_rating type="oars-1.1"/>
 
@@ -30,8 +29,8 @@
     </release>
   </releases>
 
-  <url type="homepage">https://github.com/knuxify/SerialBowl</url>
-  <url type="bugtracker">https://github.com/knuxify/SerialBowl/issues</url>
+  <url type="homepage">https://github.com/knuxify/SerialConsole</url>
+  <url type="bugtracker">https://github.com/knuxify/SerialConsole/issues</url>
 
   <categories>
     <category>Utility</category>

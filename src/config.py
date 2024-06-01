@@ -5,7 +5,7 @@ Shim for global config access.
 from gi.repository import Gio, Gtk
 from enum import IntEnum
 
-config = Gio.Settings.new("com.github.knuxify.SerialBowl")
+config = Gio.Settings.new("com.github.knuxify.SerialConsole")
 enums = {}
 
 # GSettings enum handlers

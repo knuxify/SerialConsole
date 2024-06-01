@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Serial Bowl
+Name=Serial Console
 GenericName=Serial console
 Comment=Connect to serial console
-Exec=serialbowl %U
-Icon=com.github.knuxify.SerialBowl
+Exec=serialconsole %U
+Icon=com.github.knuxify.SerialConsole
 Terminal=false
 Type=Application
 StartupNotify=true

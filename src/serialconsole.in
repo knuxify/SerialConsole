@@ -16,21 +16,21 @@ localedir = '@localedir@'
 sys.path.insert(1, pkgdatadir)
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 try:
-    locale.bindtextdomain('com.github.knuxify.SerialBowl', localedir)
-    locale.textdomain('com.github.knuxify.SerialBowl')
+    locale.bindtextdomain('com.github.knuxify.SerialConsole', localedir)
+    locale.textdomain('com.github.knuxify.SerialConsole')
 except:
     print("Python built without locale support, some translations may not work!")
-gettext.install('com.github.knuxify.SerialBowl', localedir)
+gettext.install('com.github.knuxify.SerialConsole', localedir)
 
 if __name__ == '__main__':
     import gi
 
     from gi.repository import Gio
-    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'serialbowl.gresource'))
+    resource = Gio.Resource.load(os.path.join(pkgdatadir, 'serialconsole.gresource'))
     resource._register()
 
-    import serialbowl
-    serialbowl.VERSION = VERSION
+    import serialconsole
+    serialconsole.VERSION = VERSION
 
-    from serialbowl import main
+    from serialconsole import main
     sys.exit(main.main(VERSION))

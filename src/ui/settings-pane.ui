@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="SerialBowlSettingsPane" parent="GtkBox">
+  <template class="SerialConsoleSettingsPane" parent="GtkBox">
     <property name="orientation">vertical</property>
     <property name="hexpand">true</property>
     <style><class name="sb-sidebar"/></style>

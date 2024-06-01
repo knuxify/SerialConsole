@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <template class="SerialBowlWindow" parent="AdwApplicationWindow">
+  <template class="SerialConsoleWindow" parent="AdwApplicationWindow">
     <property name="width-request">330</property>
     <property name="height-request">200</property>
     <property name="default-width">800</property>
     <property name="default-height">600</property>
 
-    <property name="title">Serial Bowl</property>
+    <property name="title">Serial Console</property>
 
     <child>
       <object class="AdwBreakpoint">
@@ -72,7 +72,7 @@
                 </child>
 
                 <child>
-                  <object class="SerialBowlSettingsPane" id="sidebar"/>
+                  <object class="SerialConsoleSettingsPane" id="sidebar"/>
                 </child>
               </object>
             </child>

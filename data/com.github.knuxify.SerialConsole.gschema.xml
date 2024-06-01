@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="com.github.knuxify.SerialBowl">
+<schemalist gettext-domain="com.github.knuxify.SerialConsole">
 
-  <enum id="com.github.knuxify.SerialBowl.enums.parity">
+  <enum id="com.github.knuxify.SerialConsole.enums.parity">
     <value nick="None" value="0"/>
     <value nick="Even" value="1"/>
     <value nick="Odd" value="2"/>
@@ -9,14 +9,14 @@
     <value nick="Mark" value="4"/>
   </enum>
 
-  <enum id="com.github.knuxify.SerialBowl.enums.flowcontrol">
+  <enum id="com.github.knuxify.SerialConsole.enums.flowcontrol">
     <value nick="None" value="0"/>
     <value nick="Hardware (RTS/CTS)" value="1"/>
     <value nick="Hardware (DSR/DTR)" value="2"/>
     <value nick="Software" value="3"/>
   </enum>
 
-  <schema id="com.github.knuxify.SerialBowl" path="/com/github/knuxify/SerialBowl/">
+  <schema id="com.github.knuxify.SerialConsole" path="/com/github/knuxify/SerialConsole/">
     <key name="port" type="s"> <!-- we could use "o" here for path, but that doesn't let us null it out -->
       <default>"/dev/ttyUSB0"</default>
       <summary>Path to serial device</summary>
@@ -38,7 +38,7 @@
       <summary>Data bits</summary>
     </key>
 
-    <key name="parity" enum="com.github.knuxify.SerialBowl.enums.parity">
+    <key name="parity" enum="com.github.knuxify.SerialConsole.enums.parity">
       <default>"None"</default>
       <summary>Parity</summary>
     </key>
@@ -49,7 +49,7 @@
       <summary>Stop bits</summary>
     </key>
 
-    <key name="flow-control" enum="com.github.knuxify.SerialBowl.enums.flowcontrol">
+    <key name="flow-control" enum="com.github.knuxify.SerialConsole.enums.flowcontrol">
       <default>"None"</default>
       <summary>Flow control</summary>
     </key>

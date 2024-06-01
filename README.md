@@ -1,4 +1,4 @@
-# Serial Bowl
+# Serial Console
 
 Access any serial console
 
