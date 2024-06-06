@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0" />
+  <menu id="context_model">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Copy</attribute>
+        <attribute name="action">term.copy</attribute>
+        <attribute name="hidden-when">action-disabled</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Paste</attribute>
+        <attribute name="action">term.paste</attribute>
+        <attribute name="hidden-when">action-disabled</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Select All</attribute>
+        <attribute name="action">term.select-all</attribute>
+        <attribute name="hidden-when">action-disabled</attribute>
+      </item>
+    </section>
+  </menu>
+  <template class="SerialTerminal" parent="VteTerminal">
+    <property name="context-menu-model">context_model</property>
+    <signal name="selection-changed" handler="selection_changed"/>
+    <child>
+      <object class="GtkShortcutController">
+        <property name="propagation-phase">capture</property>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Shift&gt;&lt;Primary&gt;c</property>
+            <property name="action">action(term.copy)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Shift&gt;&lt;Primary&gt;v</property>
+            <property name="action">action(term.paste)</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

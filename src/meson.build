@@ -32,6 +32,7 @@ serialconsole_sources = [
   'logger.py',
   'main.py',
   'serial.py',
+  'terminal.py',
   'window.py',
 ]
 

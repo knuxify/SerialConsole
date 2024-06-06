@@ -125,7 +125,7 @@
                         <property name="hexpand">true</property>
 
                         <child>
-                          <object class="VteTerminal" id="terminal">
+                          <object class="SerialTerminal" id="terminal">
                             <signal name="commit" handler="terminal_commit"/>
                             <style>
                               <class name="terminal"/>

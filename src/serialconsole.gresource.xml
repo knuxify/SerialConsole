@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/com/github/knuxify/SerialConsole">
     <file>ui/settings-pane.ui</file>
+    <file>ui/terminal.ui</file>
     <file>ui/window.ui</file>
     <file>style.css</file>
   </gresource>

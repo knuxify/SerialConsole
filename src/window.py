@@ -3,7 +3,6 @@ Main code for the application window.
 """
 
 from gi.repository import Adw, Gio, GLib, GObject, Gtk, Vte  # noqa: F401
-from gi.repository.Vte import Terminal as VteTerminal  # noqa: F401
 import serial.tools.list_ports
 import time
 import threading
@@ -18,6 +17,7 @@ from .config import (
 )
 from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
 from .serial import SerialHandler, SerialHandlerState
+from .terminal import SerialTerminal  # noqa: F401
 from .logger import SerialLogger
 
 
