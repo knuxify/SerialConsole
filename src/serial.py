@@ -152,6 +152,10 @@ class SerialHandler(GObject.Object):
         self.serial.rtscts = value == FlowControl.HARDWARE_RTS_CTS
         self.serial.dsrdtr = value == FlowControl.HARDWARE_DSR_DTR
 
+    @GObject.Signal
+    def error(self, errno: int, message: str):
+        pass
+
     def open(self):
         """Opens the serial port."""
         try:
@@ -160,6 +164,7 @@ class SerialHandler(GObject.Object):
             if e.errno == 2:  # Happens with symlinked ports sometimes
                 return
             traceback.print_exc()
+            self.emit("error", e.errno, str(e))
             return
         self.serial_loop_start()
         self.notify("state")

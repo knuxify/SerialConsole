@@ -50,6 +50,7 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         self.serial = SerialHandler()
         self.serial.connect("read_done", self.terminal_read)
         self.serial.connect("notify::state", self.handle_state_change)
+        self.serial.connect("error", self.handle_error)
         self.sidebar.reconnect_automatically.bind_property(
             "active",
             self.serial,
@@ -119,6 +120,20 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
             self.open_button.set_sensitive(bool(self.ports.get_n_items()))
             self.close_button.set_sensitive(False)
             self.open_button_switcher.set_visible_child(self.open_button)
+
+    def handle_error(self, serial, errno: int, message: str):
+        if errno == 16:
+            self.toast_overlay.add_toast(
+                Adw.Toast.new(
+                    _("Serial port {port} is busy; make sure no other application is using it").format(port=serial.port)
+                )
+            )
+        else:
+            self.toast_overlay.add_toast(
+                Adw.Toast.new(
+                    _("A connection error has occured: {msg}").format(msg=messsage)
+                )
+            )
 
     @Gtk.Template.Callback()
     def open_serial(self, *args):
