@@ -453,9 +453,9 @@ class SerialConsoleSettingsPane(Gtk.Box):
         # baudrate, so we ignore the passed selector value.
         try:
             baudrate = int(self.baudrate_selector.get_selected_item().get_string())
-            self.custom_baudrate.set_sensitive(False)
+            self.custom_baudrate.set_visible(False)
         except ValueError:  # selected rate is a string, so Custom
-            self.custom_baudrate.set_sensitive(True)
+            self.custom_baudrate.set_visible(True)
             try:
                 baudrate = int(self.custom_baudrate.get_text())
             except ValueError:  # baudrate is empty
