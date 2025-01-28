@@ -18,6 +18,7 @@ class SerialTerminal(Vte.Terminal):
         self.action_set_enabled("term.copy", False)
         self.install_action("term.paste", None, self.paste_activated)
         self.install_action("term.select-all", None, self.select_all_activated)
+        self.install_action("term.reset", None, self.reset_activated)
 
     @Gtk.Template.Callback()
     def selection_changed(self, *args):
@@ -46,3 +47,7 @@ class SerialTerminal(Vte.Terminal):
     # Select all
     def select_all_activated(self, *args):
         self.select_all()
+
+    # Reset terminal
+    def reset_activated(self, *args):
+        self.reset(True, True)

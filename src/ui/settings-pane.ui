@@ -155,6 +155,14 @@
                         <property name="subtitle" translatable="yes">Print out inputted text</property>
                       </object>
                     </child>
+
+                    <child>
+                      <object class="AdwButtonRow">
+                        <property name="title" translatable="yes">Reset Console</property>
+                        <signal name="activated" handler="reset_console"/>
+                        <style><class name="destructive-action"/></style>
+                      </object>
+                    </child>
                   </object>
                 </child>
 

@@ -512,3 +512,7 @@ class SerialConsoleSettingsPane(Gtk.Box):
             return
 
         config["log-path"] = response.get_path()
+
+    @Gtk.Template.Callback()
+    def reset_console(self, *args):
+        self.get_native().terminal.reset_activated()

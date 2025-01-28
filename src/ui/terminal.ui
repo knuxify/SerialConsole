@@ -6,16 +6,20 @@
       <item>
         <attribute name="label" translatable="yes">_Copy</attribute>
         <attribute name="action">term.copy</attribute>
-        <attribute name="hidden-when">action-disabled</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Paste</attribute>
         <attribute name="action">term.paste</attribute>
-        <attribute name="hidden-when">action-disabled</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Select All</attribute>
         <attribute name="action">term.select-all</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Reset Console</attribute>
+        <attribute name="action">term.reset</attribute>
         <attribute name="hidden-when">action-disabled</attribute>
       </item>
     </section>
@@ -36,6 +40,12 @@
           <object class="GtkShortcut">
             <property name="trigger">&lt;Shift&gt;&lt;Primary&gt;v</property>
             <property name="action">action(term.paste)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkShortcut">
+            <property name="trigger">&lt;Shift&gt;&lt;Primary&gt;l</property>
+            <property name="action">action(term.reset)</property>
           </object>
         </child>
       </object>
