@@ -32,7 +32,6 @@ class SerialTerminal(Vte.Terminal):
     def paste_callback(self, source, result, *args):
         try:
             text = source.read_text_finish(result)
-            print(text)
         except GLib.GError:
             import traceback
             traceback.print_exc()
