@@ -158,6 +158,7 @@
                   </object>
                 </child>
 
+
                 <child>
                   <object class="AdwPreferencesGroup" id="logging_settings_box">
                     <property name="title" translatable="yes">Logging</property>
@@ -170,9 +171,17 @@
                     </child>
 
                     <child>
-                      <object class="AdwEntryRow" id="log_path_entry">
+                      <object class="AdwActionRow" id="log_path_row">
                         <property name="title" translatable="yes">Log path</property>
-                        <property name="show-apply-button">true</property>
+                        <child type="suffix">
+                          <object class="GtkButton" id="log_path_set_button">
+                            <property name="valign">center</property>
+                            <property name="tooltip-text" translatable="yes">Set log path</property>
+                            <property name="icon-name">document-open-symbolic</property>
+                            <style><class name="flat"/></style>
+                            <signal name="clicked" handler="show_log_path_chooser"/>
+                          </object>
+                        </child>
                       </object>
                     </child>
 

@@ -8,6 +8,10 @@ import os
 from .config import config
 from .serial import SerialHandlerState
 
+# TRANSLATORS: Default log file filename, lowercase, preferrably with no spaces.
+# Do not add a file extension!
+DEFAULT_LOG_FILENAME = _("serial-log") + ".txt"
+
 class SerialLogger(GObject.Object):
     """Handles logging for the serial file."""
 

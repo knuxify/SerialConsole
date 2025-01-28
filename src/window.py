@@ -6,6 +6,7 @@ from gi.repository import Adw, Gio, GLib, GObject, Gtk, Vte  # noqa: F401
 import serial.tools.list_ports
 import time
 import threading
+from typing import Optional
 
 from .config import (
     config,
@@ -18,7 +19,7 @@ from .config import (
 from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
 from .serial import SerialHandler, SerialHandlerState
 from .terminal import SerialTerminal  # noqa: F401
-from .logger import SerialLogger
+from .logger import SerialLogger, DEFAULT_LOG_FILENAME
 
 
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/window.ui")
@@ -219,7 +220,7 @@ class SerialConsoleSettingsPane(Gtk.Box):
     local_echo_toggle = Gtk.Template.Child()
 
     log_enable_toggle = Gtk.Template.Child()
-    log_path_entry = Gtk.Template.Child()
+    log_path_row = Gtk.Template.Child()
 
     def __init__(self):
         super().__init__()
@@ -231,6 +232,20 @@ class SerialConsoleSettingsPane(Gtk.Box):
         # Only allow numbers to be typed into custom baud rate field
         self.custom_baudrate.set_input_purpose(Gtk.InputPurpose.DIGITS)
         self.custom_baudrate.get_delegate().connect("insert-text", disallow_nonnumeric)
+
+        self._log_path_dialog = Gtk.FileDialog.new()
+        self._log_path_dialog.props.initial_name = DEFAULT_LOG_FILENAME
+        self._log_path_dialog.props.initial_folder = Gio.File.new_for_path(
+            GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+        )
+        self._log_path_dialog.props.modal = True
+
+        # Set default value for log-path
+        if config["log-path"] == "":
+            config["log-path"] = os.path.join(
+                GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS),
+                DEFAULT_LOG_FILENAME
+            )
 
         self.connect("realize", self._setup)
 
@@ -401,11 +416,14 @@ class SerialConsoleSettingsPane(Gtk.Box):
             flags=Gio.SettingsBindFlags.DEFAULT,
         )
 
-        self.log_path_entry.set_text(config["log-path"])
-        self.log_path_entry.connect("apply", self.set_log_path_from_pane)
+        config.bind(
+            "log-path",
+            self.log_path_row,
+            "subtitle",
+            flags=Gio.SettingsBindFlags.DEFAULT,
+        )
 
-    def set_log_path_from_pane(self, *args):
-        config["log-path"] = self.log_path_entry.get_text()
+        self.log_path_row.set_subtitle(config["log-path"])
 
     def update_scrollback_from_pane(self, *args):
         if config["unlimited-scrollback"]:
@@ -469,3 +487,28 @@ class SerialConsoleSettingsPane(Gtk.Box):
     @Gtk.Template.Callback()
     def set_stop_bits_from_selector(self, selector, *args):
         self.serial.stop_bits = int(selector.get_selected_item().get_string())
+
+    @Gtk.Template.Callback()
+    def show_log_path_chooser(self, *args):
+        self._log_path_dialog.save(
+            self.get_native(),
+            None,
+            self.set_log_path_from_chooser,
+            None
+        )
+
+    def set_log_path_from_chooser(
+        self,
+        dialog: Gtk.FileDialog,
+        result: Gio.AsyncResult,
+        *args
+    ):
+        try:
+            response: Optional[Gio.File] = dialog.save_finish(result)
+        except GLib.Error:
+            return
+
+        if response is None:
+            return
+
+        config["log-path"] = response.get_path()
