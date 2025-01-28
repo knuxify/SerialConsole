@@ -235,9 +235,9 @@ class SerialConsoleSettingsPane(Gtk.Box):
 
         self._log_path_dialog = Gtk.FileDialog.new()
         self._log_path_dialog.props.initial_name = DEFAULT_LOG_FILENAME
-        self._log_path_dialog.props.initial_folder = Gio.File.new_for_path(
+        self._log_path_dialog.set_initial_folder(Gio.File.new_for_path(
             GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
-        )
+        ))
         self._log_path_dialog.props.modal = True
 
         # Set default value for log-path
