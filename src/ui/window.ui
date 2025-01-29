@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <template class="SerialConsoleWindow" parent="AdwApplicationWindow">
-    <property name="width-request">330</property>
+    <property name="width-request">360</property>
     <property name="height-request">200</property>
     <property name="default-width">800</property>
     <property name="default-height">600</property>
