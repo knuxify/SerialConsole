@@ -81,7 +81,7 @@
 
         <property name="content">
           <object class="AdwNavigationPage">
-            <property name="title" translatable="yes">Console</property>
+            <property name="title" translatable="yes">Serial Console</property>
             <child>
               <object class="AdwToolbarView" id="console_container">
                 <property name="hexpand">true</property>
@@ -93,7 +93,7 @@
                   <object class="AdwHeaderBar" id="console_header">
                     <property name="title-widget">
                       <object class="AdwWindowTitle">
-                        <property name="title" translatable="yes">Console</property>
+                        <property name="title" translatable="yes">Serial Console</property>
                       </object>
                     </property>
 
