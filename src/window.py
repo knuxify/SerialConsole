@@ -109,8 +109,8 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
         # Toggle "reconnecting" banner
         self.reconnecting_banner.set_revealed(state == SerialHandlerState.RECONNECTING)
-        # Toggle terminal sensitivity
-        self.terminal.props.sensitive = (state == SerialHandlerState.OPEN)
+        # Update terminal's connection status
+        self.terminal.props.connected = (state == SerialHandlerState.OPEN)
 
         # Update open button
         if state != SerialHandlerState.CLOSED:
@@ -160,6 +160,9 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def terminal_commit(self, terminal, text, size, *args):
         """Get input from the terminal and send it over serial."""
+        if not self.terminal.props.connected:
+            self.terminal.feed(bytes("\a", "utf-8"))
+            return
         if config["echo"]:
             self.terminal.feed(bytes(text, "utf-8"))
             self.logger.write_text(text)

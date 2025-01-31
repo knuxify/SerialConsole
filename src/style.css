@@ -1,10 +1,10 @@
 .terminal {
 	padding: 6px;
-	transition: opacity 0.1s linear;
+	transition: filter 100ms ease-out;
 }
 
-.terminal:disabled {
-	opacity: 0.5;
+.terminal.disabled {
+	filter: opacity(var(--disabled-opacity));
 }
 
 .sb-settings-container {

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from gi.repository import GLib, Gdk, Gtk, Vte
+from gi.repository import GLib, Gdk, Gtk, GObject, Vte
 
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/terminal.ui")
 class SerialTerminal(Vte.Terminal):
@@ -19,6 +19,23 @@ class SerialTerminal(Vte.Terminal):
         self.install_action("term.paste", None, self.paste_activated)
         self.install_action("term.select-all", None, self.select_all_activated)
         self.install_action("term.reset", None, self.reset_activated)
+
+        self._connected = False
+
+    @GObject.Property(type=bool, default=False)
+    def connected(self):
+        """Whether the terminal is connected."""
+        return self._connected
+
+    @connected.setter
+    def connected(self, connected: bool):
+        self._connected = connected
+        if connected:
+            self.remove_css_class("disabled")
+            self.props.cursor_blink_mode = Vte.CursorBlinkMode.SYSTEM
+        else:
+            self.add_css_class("disabled")
+            self.props.cursor_blink_mode = Vte.CursorBlinkMode.OFF
 
     @Gtk.Template.Callback()
     def selection_changed(self, *args):

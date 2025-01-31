@@ -26,6 +26,7 @@
   </menu>
   <template class="SerialTerminal" parent="VteTerminal">
     <property name="context-menu-model">context_model</property>
+    <property name="audible-bell">true</property>
     <signal name="selection-changed" handler="selection_changed"/>
     <child>
       <object class="GtkShortcutController">
