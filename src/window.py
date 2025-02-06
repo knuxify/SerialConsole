@@ -43,7 +43,9 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         super().__init__(*args, **kwargs)
         self.reconnect_thread = None
 
-        self.get_application().get_style_manager().connect(
+        application = self.get_application()
+
+        application.get_style_manager().connect(
             "notify::dark", self.theme_change_callback
         )
         self.set_terminal_color_scheme()
@@ -65,6 +67,8 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
         self.logger = SerialLogger(self.serial)
         self.logger.connect("log-open-failure", self.on_log_open_failure)
+
+        self.set_icon_name(application.get_application_id())
 
         self.connect("close-request", self.on_close)
 
