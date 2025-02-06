@@ -131,18 +131,16 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
             self.open_button_switcher.set_visible_child(self.open_button)
 
     def handle_error(self, serial, errno: int, message: str):
-        if errno == 16:
-            self.toast_overlay.add_toast(
-                Adw.Toast.new(
-                    _("Serial port {port} is busy; make sure no other application is using it").format(port=serial.port)
-                )
-            )
-        else:
-            self.toast_overlay.add_toast(
-                Adw.Toast.new(
-                    _("A connection error has occured: {msg}").format(msg=messsage)
-                )
-            )
+        error_message = _("A connection error has occured: {msg}").format(msg=message)
+
+        if errno == 13:
+            error_message = _("Permission denied for port {port}; make sure you're in the \"tty\" group").format(port=serial.port)
+        elif errno == 16:
+            error_message = _("Serial port {port} is busy; make sure no other application is using it").format(port=serial.port)
+
+        self.toast_overlay.add_toast(
+            Adw.Toast.new(error_message)
+        )
 
     @Gtk.Template.Callback()
     def open_serial(self, *args):
