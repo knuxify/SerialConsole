@@ -6,6 +6,6 @@ install_data(
 
 symbolic_dir = join_paths('hicolor', 'symbolic', 'apps')
 install_data(
-  ('@0@-symbolic.svg').format(app_id),
+  'com.github.knuxify.SerialConsole-symbolic.svg',
   install_dir: join_paths(get_option('datadir'), 'icons', symbolic_dir)
 )

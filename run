@@ -1,7 +1,17 @@
 #!/bin/sh
-rm -r output
-rm -r /tmp/serialconsole
-meson --prefix=/tmp/serialconsole . output
+
+if [ ! -e src ]; then echo "Not in source directory"; exit 1; fi
+if [ -e output ]; then rm -r output; fi
+if [ -e '/tmp/serialconsole' ]; then rm -r '/tmp/serialconsole'; fi
+
+set -e
+meson setup --prefix=/tmp/serialconsole -Ddevel=true . output
 meson compile -C output
 meson install -C output
-GSETTINGS_SCHEMA_DIR=/tmp/serialconsole/share/glib-2.0/schemas /tmp/serialconsole/bin/serialconsole
+set +e
+
+GSETTINGS_SCHEMA_DIR=/tmp/serialconsole/share/glib-2.0/schemas /tmp/serialconsole/bin/serialconsole-devel "$@"
+ret=$?
+
+exit $ret
+

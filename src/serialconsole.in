@@ -10,6 +10,7 @@ import gettext
 import locale
 
 VERSION = '@VERSION@'
+DEVEL = @DEVEL@
 pkgdatadir = '@pkgdatadir@'
 localedir = '@localedir@'
 
@@ -30,6 +31,7 @@ if __name__ == '__main__':
     resource._register()
 
     import serialconsole
+    serialconsole.DEVEL = DEVEL
     serialconsole.VERSION = VERSION
 
     from serialconsole import main

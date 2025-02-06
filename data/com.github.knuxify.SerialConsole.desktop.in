@@ -2,11 +2,11 @@
 Name=Serial Console
 GenericName=Serial console
 Comment=Connect to serial console
-Exec=serialconsole %U
-Icon=com.github.knuxify.SerialConsole
+Exec=@APP_BIN_NAME@ %U
+Icon=@APP_ID@
 Terminal=false
 Type=Application
 StartupNotify=true
-Categories=GNOME;GTK;Tools;
+Categories=GNOME;GTK;Tools;Utilities
 Keywords=serial;uart;console;debug;
 X-Purism-FormFactor=Workstation;Mobile;

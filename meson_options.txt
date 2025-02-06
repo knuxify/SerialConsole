@@ -1,0 +1,2 @@
+option('devel', type : 'boolean', value : false,
+       description : 'Mark this build as a development build.')

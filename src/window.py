@@ -8,6 +8,7 @@ import time
 import threading
 from typing import Optional
 
+from . import DEVEL
 from .config import (
     config,
     Parity,
@@ -42,6 +43,9 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reconnect_thread = None
+
+        if DEVEL:
+            self.add_css_class("devel")
 
         application = self.get_application()
 
