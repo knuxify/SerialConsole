@@ -182,7 +182,7 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         if config["disable-info-messages"]:
             return
 
-        if not self.terminal.get_text()[0].strip():
+        if self.terminal.get_text()[0] is None or not self.terminal.get_text()[0].strip():
             self.terminal.feed(bytes(f"\r\033[0;90m--- {text} ---\r\n\033[0m", "utf-8"))
         else:
             self.terminal.feed(
