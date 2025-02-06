@@ -7,6 +7,7 @@ import serial
 import time
 import traceback
 import threading
+import termios
 
 from .config import Parity, FlowControl
 
@@ -156,15 +157,34 @@ class SerialHandler(GObject.Object):
     def error(self, errno: int, message: str):
         pass
 
-    def open(self):
-        """Opens the serial port."""
+    def _open(self) -> bool:
+        """
+        Raw port open call, without state notify wrapper.
+
+        Returns True if opening the port succeeded, False otherwise.
+        """
         try:
             self.serial.open()
         except serial.serialutil.SerialException as e:
-            if e.errno == 2:  # Happens with symlinked ports sometimes
-                return
+            errno = e.errno
+            if errno is None:  # pyserial does not pass termios.error errnos, do it manually
+                errno = 0
+                if str(e).startswith("("):
+                    try:
+                        errno = int(str(e)[1:].split(',')[0])
+                    except ValueError:
+                        pass
+
+            if errno == 2:  # Happens with symlinked ports sometimes
+                return True
             traceback.print_exc()
-            self.emit("error", e.errno, str(e))
+            self.emit("error", errno, str(e))
+            return False
+        return True
+
+    def open(self):
+        """Opens the serial port."""
+        if self._open() is False:
             return
         self.serial_loop_start()
         self.notify("state")
@@ -243,14 +263,7 @@ class SerialHandler(GObject.Object):
         while self.props.reconnect_automatically and not self._stop_serial_loop:
             for port in serial.tools.list_ports.comports():
                 if self.port == port[0]:
-                    try:
-                        self.serial.open()
-                    except serial.serialutil.SerialException as e:
-                        if e.errno == 2:  # Happens with symlinked ports sometimes
-                            continue
-                        traceback.print_exc()
-                        self._is_reconnecting = False
-                        # state notify is done in serial_loop
+                    if self._open() is False:
                         return False
                     self._is_reconnecting = False
                     GLib.idle_add(self.notify, "state")
