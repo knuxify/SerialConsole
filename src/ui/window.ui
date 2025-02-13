@@ -105,6 +105,14 @@
                         <signal name="clicked" handler="open_sidebar"/>
                       </object>
                     </child>
+
+                    <child type="start">
+                      <object class="GtkToggleButton" id="search_toggle_button">
+                        <property name="icon-name">system-search-symbolic</property>
+                        <property name="tooltip-text" translatable="yes">Find in Console</property>
+                        <property name="active" bind-source="search_bar" bind-property="search-mode-enabled" bind-flags="bidirectional | sync-create"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
 
@@ -112,6 +120,56 @@
                   <object class="AdwBanner" id="reconnecting_banner">
                     <property name="title" translatable="yes">Connection lost; attempting to reconnect…</property>
                     <style><class name="error"/></style>
+                  </object>
+                </child>
+
+                <child type="top">
+                  <object class="GtkSearchBar" id="search_bar">
+                    <child>
+                      <object class="AdwClamp">
+                        <property name="maximum-size">500</property>
+
+                        <child>
+                          <object class="GtkBox">
+                            <property name="spacing">6</property>
+
+                            <child>
+                              <object class="GtkSearchEntry" id="search_entry">
+                                <property name="placeholder-text" translatable="yes">Find text</property>
+                                <property name="hexpand">true</property>
+                                <signal name="search-changed" handler="search_changed"/>
+                                <signal name="next-match" handler="search_next"/>
+                                <signal name="previous-match" handler="search_previous"/>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkButton" id="search_previous">
+                                <property name="icon-name">go-up-symbolic</property>
+                                <property name="tooltip-text" translatable="yes">Previous Match</property>
+                                <signal name="clicked" handler="search_previous"/>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkButton" id="search_next">
+                                <property name="icon-name">go-down-symbolic</property>
+                                <property name="tooltip-text" translatable="yes">Next Match</property>
+                                <signal name="clicked" handler="search_next"/>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="GtkMenuButton" id="search_settings">
+                                <property name="icon-name">view-more-symbolic</property>
+                                <property name="tooltip-text" translatable="yes">Search Options…</property>
+                                <property name="popover">search_settings_popover</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
 
@@ -156,4 +214,33 @@
       </item>
     </section>
   </menu>
+
+  <object class="GtkPopover" id="search_settings_popover">
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <style>
+          <class name="list"/>
+        </style>
+
+        <child>
+          <object class="GtkCheckButton" id="search_wrap_around_toggle">
+            <property name="label" translatable="yes">Wrap Around</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkCheckButton" id="search_case_sensitive_toggle">
+            <property name="label" translatable="yes">Case Sensitive</property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkCheckButton" id="search_regex_toggle">
+            <property name="label" translatable="yes">Match by Regular Expression</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0" />
+
   <menu id="context_model">
     <section>
       <item>
@@ -24,9 +25,14 @@
       </item>
     </section>
   </menu>
+
   <template class="SerialTerminal" parent="VteTerminal">
+    <property name="enable-fallback-scrolling">False</property>
+    <property name="scroll-unit-is-pixels">True</property>
+    <property name="enable-a11y">True</property>
     <property name="context-menu-model">context_model</property>
     <property name="audible-bell">true</property>
+
     <signal name="selection-changed" handler="selection_changed"/>
     <child>
       <object class="GtkShortcutController">

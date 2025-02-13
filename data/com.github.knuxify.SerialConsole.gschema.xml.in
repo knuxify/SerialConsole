@@ -94,5 +94,22 @@
       <default>false</default>
       <summary>Write raw binary data to log file</summary>
     </key>
+
+    <!-- Search settings -->
+    
+    <key name="search-wrap-around" type="b">
+      <default>true</default>
+      <summary>Search: Wrap Around</summary>
+    </key>
+
+    <key name="search-case-sensitive" type="b">
+      <default>false</default>
+      <summary>Search: Case Sensitive</summary>
+    </key>
+
+    <key name="search-regex" type="b">
+      <default>false</default>
+      <summary>Search: Match by Regular Expression</summary>
+    </key>
   </schema>
 </schemalist>

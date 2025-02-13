@@ -32,6 +32,7 @@ class Application(Adw.Application):
 
         self.set_accels_for_action(f"term.copy", ("<shift><primary>c", None))
         self.set_accels_for_action(f"term.paste", ("<shift><primary>v", None))
+        self.set_accels_for_action(f"win.find", ("<shift><primary>f", None))
 
         win.present()
         self._ = _

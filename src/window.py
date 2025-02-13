@@ -23,6 +23,10 @@ from .terminal import SerialTerminal  # noqa: F401
 from .logger import SerialLogger, DEFAULT_LOG_FILENAME
 
 
+# PCRE flags for search regex:
+PCRE2_CASELESS = 0x00000008
+PCRE2_MULTILINE = 0x00000400
+
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/window.ui")
 class SerialConsoleWindow(Adw.ApplicationWindow):
     __gtype_name__ = "SerialConsoleWindow"
@@ -40,6 +44,13 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
     console_header = Gtk.Template.Child()
 
+    search_bar = Gtk.Template.Child()
+    search_entry = Gtk.Template.Child()
+
+    search_wrap_around_toggle = Gtk.Template.Child()
+    search_case_sensitive_toggle = Gtk.Template.Child()
+    search_regex_toggle = Gtk.Template.Child()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reconnect_thread = None
@@ -49,11 +60,42 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
         application = self.get_application()
 
+        # Set up terminal style
         application.get_style_manager().connect(
             "notify::dark", self.theme_change_callback
         )
         self.set_terminal_color_scheme()
 
+        # Set up search bar
+        self.search_bar.connect_entry(self.search_entry)
+        self.install_action("win.find", None, self.toggle_search_bar)
+        self.terminal.search_set_wrap_around(True)
+        self.prev_search_query: Optional[str] = None
+
+        search_cfg_toggles = {
+            "search-wrap-around": self.search_wrap_around_toggle,
+            "search-case-sensitive": self.search_case_sensitive_toggle,
+            "search-regex": self.search_regex_toggle
+        }
+
+        for search_cfg, search_cfg_toggle in search_cfg_toggles.items():
+            config.bind(
+                search_cfg,
+                search_cfg_toggle,
+                "active",
+                flags=Gio.SettingsBindFlags.DEFAULT,
+            )
+
+            self.bind_property(
+                search_cfg,
+                search_cfg_toggle,
+                "active",
+                GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
+            )
+
+            self.connect(f"notify::{search_cfg}", self.search_changed)
+
+        # Set up serial handler
         self.serial = SerialHandler()
         self.serial.connect("read_done", self.terminal_read)
         self.serial.connect("notify::state", self.handle_state_change)
@@ -69,9 +111,11 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         self.get_available_ports()
         GLib.timeout_add(1000, self.get_available_ports)
 
+        # Set up logger
         self.logger = SerialLogger(self.serial)
         self.logger.connect("log-open-failure", self.on_log_open_failure)
 
+        # Miscelaneous app setup
         self.set_icon_name(application.get_application_id())
 
         self.connect("close-request", self.on_close)
@@ -206,6 +250,64 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
     def theme_change_callback(self, *args):
         GLib.idle_add(self.set_terminal_color_scheme)
+
+    # Search function
+    def toggle_search_bar(self, *args):
+        self.search_bar.props.search_mode_enabled = \
+            not self.search_bar.props.search_mode_enabled
+
+    @Gtk.Template.Callback()
+    def search_changed(self, *args):
+        flags = PCRE2_MULTILINE
+
+        query =	self.search_entry.get_text()
+        if self.props.search_case_sensitive:
+            query = query.lower()
+            flags |= PCRE2_CASELESS
+
+        if not self.props.search_regex:
+            query = GLib.Regex.escape_string(query, len(query))
+
+        try:
+            regex = Vte.Regex.new_for_search(query, len(query), flags)
+        except GLib.Error:
+            self.search_entry.add_css_class("error")
+            self.prev_search_query = query
+            return
+        else:
+            self.search_entry.remove_css_class("error")
+
+        # Jump to searched query; code adapted from gnome-console
+        narrowing_down = self.prev_search_query and query in self.prev_search_query
+        if not narrowing_down:
+            self.terminal.search_find_previous()
+
+        self.terminal.search_set_regex(regex, 0)
+
+        if narrowing_down:
+            self.terminal.search_find_previous()
+        self.terminal.search_find_next()
+
+        self.prev_search_query = query
+
+    @Gtk.Template.Callback()
+    def search_previous(self, *args):
+        self.terminal.search_find_previous()
+
+    @Gtk.Template.Callback()
+    def search_next(self, *args):
+        self.terminal.search_find_next()
+
+    search_case_sensitive = GObject.Property(type=bool, default=False)
+    search_regex = GObject.Property(type=bool, default=False)
+
+    @GObject.Property(type=bool, default=True)
+    def search_wrap_around(self):
+        return self.terminal.search_get_wrap_around()
+
+    @search_wrap_around.setter
+    def search_wrap_around(self, search_wrap_around: bool):
+        return self.terminal.search_set_wrap_around(search_wrap_around)
 
 
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/settings-pane.ui")
