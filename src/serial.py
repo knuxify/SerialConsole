@@ -167,11 +167,13 @@ class SerialHandler(GObject.Object):
             self.serial.open()
         except serial.serialutil.SerialException as e:
             errno = e.errno
-            if errno is None:  # pyserial does not pass termios.error errnos, do it manually
+            if (
+                errno is None
+            ):  # pyserial does not pass termios.error errnos, do it manually
                 errno = 0
                 if str(e).startswith("("):
                     try:
-                        errno = int(str(e)[1:].split(',')[0])
+                        errno = int(str(e)[1:].split(",")[0])
                     except ValueError:
                         pass
 

@@ -12,6 +12,7 @@ from .serial import SerialHandlerState
 # Do not add a file extension!
 DEFAULT_LOG_FILENAME = _("serial-log") + ".txt"
 
+
 class SerialLogger(GObject.Object):
     """Handles logging for the serial file."""
 

@@ -27,6 +27,7 @@ from .logger import SerialLogger, DEFAULT_LOG_FILENAME
 PCRE2_CASELESS = 0x00000008
 PCRE2_MULTILINE = 0x00000400
 
+
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/window.ui")
 class SerialConsoleWindow(Adw.ApplicationWindow):
     __gtype_name__ = "SerialConsoleWindow"
@@ -75,7 +76,7 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         search_cfg_toggles = {
             "search-wrap-around": self.search_wrap_around_toggle,
             "search-case-sensitive": self.search_case_sensitive_toggle,
-            "search-regex": self.search_regex_toggle
+            "search-regex": self.search_regex_toggle,
         }
 
         for search_cfg, search_cfg_toggle in search_cfg_toggles.items():
@@ -162,7 +163,7 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         # Toggle "reconnecting" banner
         self.reconnecting_banner.set_revealed(state == SerialHandlerState.RECONNECTING)
         # Update terminal's connection status
-        self.terminal.props.connected = (state == SerialHandlerState.OPEN)
+        self.terminal.props.connected = state == SerialHandlerState.OPEN
 
         # Update open button
         if state != SerialHandlerState.CLOSED:
@@ -178,13 +179,15 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         error_message = _("A connection error has occured: {msg}").format(msg=message)
 
         if errno == 13:
-            error_message = _("Permission denied for port {port}; make sure you're in the \"tty\" group").format(port=serial.port)
+            error_message = _(
+                'Permission denied for port {port}; make sure you\'re in the "tty" group'
+            ).format(port=serial.port)
         elif errno == 16:
-            error_message = _("Serial port {port} is busy; make sure no other application is using it").format(port=serial.port)
+            error_message = _(
+                "Serial port {port} is busy; make sure no other application is using it"
+            ).format(port=serial.port)
 
-        self.toast_overlay.add_toast(
-            Adw.Toast.new(error_message)
-        )
+        self.toast_overlay.add_toast(Adw.Toast.new(error_message))
 
     @Gtk.Template.Callback()
     def open_serial(self, *args):
@@ -226,7 +229,10 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         if config["disable-info-messages"]:
             return
 
-        if self.terminal.get_text()[0] is None or not self.terminal.get_text()[0].strip():
+        if (
+            self.terminal.get_text()[0] is None
+            or not self.terminal.get_text()[0].strip()
+        ):
             self.terminal.feed(bytes(f"\r\033[0;90m--- {text} ---\r\n\033[0m", "utf-8"))
         else:
             self.terminal.feed(
@@ -253,14 +259,15 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
     # Search function
     def toggle_search_bar(self, *args):
-        self.search_bar.props.search_mode_enabled = \
+        self.search_bar.props.search_mode_enabled = (
             not self.search_bar.props.search_mode_enabled
+        )
 
     @Gtk.Template.Callback()
     def search_changed(self, *args):
         flags = PCRE2_MULTILINE
 
-        query =	self.search_entry.get_text()
+        query = self.search_entry.get_text()
         if self.props.search_case_sensitive:
             query = query.lower()
             flags |= PCRE2_CASELESS
@@ -346,16 +353,18 @@ class SerialConsoleSettingsPane(Gtk.Box):
 
         self._log_path_dialog = Gtk.FileDialog.new()
         self._log_path_dialog.props.initial_name = DEFAULT_LOG_FILENAME
-        self._log_path_dialog.set_initial_folder(Gio.File.new_for_path(
-            GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
-        ))
+        self._log_path_dialog.set_initial_folder(
+            Gio.File.new_for_path(
+                GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS)
+            )
+        )
         self._log_path_dialog.props.modal = True
 
         # Set default value for log-path
         if config["log-path"] == "":
             config["log-path"] = os.path.join(
                 GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DOCUMENTS),
-                DEFAULT_LOG_FILENAME
+                DEFAULT_LOG_FILENAME,
             )
 
         self.connect("realize", self._setup)
@@ -381,9 +390,7 @@ class SerialConsoleSettingsPane(Gtk.Box):
             GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
         )
         self.serial.connect("notify::port", lambda *args: self.notify("port-display"))
-        self.serial.connect(
-            "notify::state", lambda *args: self.notify("port-display")
-        )
+        self.serial.connect("notify::state", lambda *args: self.notify("port-display"))
 
         self.setup_settings_bindings()
 
@@ -417,7 +424,6 @@ class SerialConsoleSettingsPane(Gtk.Box):
 
         # Serial parameters are directly synced to config:
         for property in ("port", "baud-rate", "data-bits", "stop-bits"):
-
             if property == "port":
                 # For ports, there is no guarantee that the last used
                 # port will be available, so we set the available port
@@ -602,17 +608,11 @@ class SerialConsoleSettingsPane(Gtk.Box):
     @Gtk.Template.Callback()
     def show_log_path_chooser(self, *args):
         self._log_path_dialog.save(
-            self.get_native(),
-            None,
-            self.set_log_path_from_chooser,
-            None
+            self.get_native(), None, self.set_log_path_from_chooser, None
         )
 
     def set_log_path_from_chooser(
-        self,
-        dialog: Gtk.FileDialog,
-        result: Gio.AsyncResult,
-        *args
+        self, dialog: Gtk.FileDialog, result: Gio.AsyncResult, *args
     ):
         try:
             response: Optional[Gio.File] = dialog.save_finish(result)

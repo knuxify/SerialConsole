@@ -2,6 +2,7 @@
 
 from gi.repository import GLib, Gdk, Gtk, GObject, Vte
 
+
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/terminal.ui")
 class SerialTerminal(Vte.Terminal):
     """
@@ -9,6 +10,7 @@ class SerialTerminal(Vte.Terminal):
 
     Actual serial logic is handled in window.py.
     """
+
     __gtype_name__ = "SerialTerminal"
 
     def __init__(self):
@@ -52,6 +54,7 @@ class SerialTerminal(Vte.Terminal):
             text = source.read_text_finish(result)
         except GLib.GError:
             import traceback
+
             traceback.print_exc()
             return
 
