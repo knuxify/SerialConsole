@@ -30,9 +30,9 @@ class Application(Adw.Application):
         self.create_action("about", self.on_about_action, None)
         self.create_action("quit", self.on_quit_action, "<Ctrl>q")
 
-        self.set_accels_for_action(f"term.copy", ("<shift><primary>c", None))
-        self.set_accels_for_action(f"term.paste", ("<shift><primary>v", None))
-        self.set_accels_for_action(f"win.find", ("<shift><primary>f", None))
+        self.set_accels_for_action("term.copy", ("<shift><primary>c", None))
+        self.set_accels_for_action("term.paste", ("<shift><primary>v", None))
+        self.set_accels_for_action("win.find", ("<shift><primary>f", None))
 
         win.present()
         self._ = _

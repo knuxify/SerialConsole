@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from gi.repository import GLib, Gdk, Gtk, GObject, Vte
+from gi.repository import GLib, Gtk, GObject, Vte
 
 
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/terminal.ui")

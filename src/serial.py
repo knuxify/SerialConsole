@@ -7,7 +7,6 @@ import serial
 import time
 import traceback
 import threading
-import termios
 
 from .config import Parity, FlowControl
 

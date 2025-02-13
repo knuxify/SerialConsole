@@ -4,9 +4,8 @@ Main code for the application window.
 
 from gi.repository import Adw, Gio, GLib, GObject, Gtk, Vte  # noqa: F401
 import serial.tools.list_ports
-import time
-import threading
 from typing import Optional
+import os.path
 
 from . import DEVEL
 from .config import (
@@ -475,7 +474,7 @@ class SerialConsoleSettingsPane(Gtk.Box):
             )
             selector.set_selected(config.get_enum(property))
             self.serial.connect(
-                "notify::" + property, lambda *args: self.notify(property + "-str")
+                "notify::" + property, lambda *args, prop=property: self.notify(prop + "-str")
             )
 
         # Set up baud rate selector
