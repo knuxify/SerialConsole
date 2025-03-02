@@ -134,36 +134,46 @@
                             <property name="spacing">6</property>
 
                             <child>
-                              <object class="GtkSearchEntry" id="search_entry">
-                                <property name="placeholder-text" translatable="yes">Find text</property>
-                                <property name="hexpand">true</property>
-                                <signal name="search-changed" handler="search_changed"/>
-                                <signal name="next-match" handler="search_next"/>
-                                <signal name="previous-match" handler="search_previous"/>
+                              <object class="GtkBox">
+                                <style>
+                                  <class name="linked"/>
+                                </style>
+
+                                <child>
+                                  <object class="GtkSearchEntry" id="search_entry">
+                                    <property name="placeholder-text" translatable="yes">Find text</property>
+                                    <property name="hexpand">true</property>
+                                    <signal name="search-changed" handler="search_changed"/>
+                                    <signal name="next-match" handler="search_next"/>
+                                    <signal name="previous-match" handler="search_previous"/>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkMenuButton" id="search_settings_button">
+                                    <property name="icon-name">view-more-symbolic</property>
+                                    <property name="tooltip-text" translatable="yes">Search Options…</property>
+                                    <property name="menu-model">search_settings_menu</property>
+                                  </object>
+                                </child>
                               </object>
                             </child>
 
                             <child>
-                              <object class="GtkButton" id="search_previous">
+                              <object class="GtkButton" id="search_previous_button">
                                 <property name="icon-name">go-up-symbolic</property>
                                 <property name="tooltip-text" translatable="yes">Previous Match</property>
+                                <property name="sensitive">false</property>
                                 <signal name="clicked" handler="search_previous"/>
                               </object>
                             </child>
 
                             <child>
-                              <object class="GtkButton" id="search_next">
+                              <object class="GtkButton" id="search_next_button">
                                 <property name="icon-name">go-down-symbolic</property>
                                 <property name="tooltip-text" translatable="yes">Next Match</property>
+                                <property name="sensitive">false</property>
                                 <signal name="clicked" handler="search_next"/>
-                              </object>
-                            </child>
-
-                            <child>
-                              <object class="GtkMenuButton" id="search_settings">
-                                <property name="icon-name">view-more-symbolic</property>
-                                <property name="tooltip-text" translatable="yes">Search Options…</property>
-                                <property name="popover">search_settings_popover</property>
                               </object>
                             </child>
                           </object>
@@ -215,32 +225,24 @@
     </section>
   </menu>
 
-  <object class="GtkPopover" id="search_settings_popover">
-    <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <style>
-          <class name="list"/>
-        </style>
-
-        <child>
-          <object class="GtkCheckButton" id="search_wrap_around_toggle">
-            <property name="label" translatable="yes">Wrap Around</property>
-          </object>
-        </child>
-
-        <child>
-          <object class="GtkCheckButton" id="search_case_sensitive_toggle">
-            <property name="label" translatable="yes">Case Sensitive</property>
-          </object>
-        </child>
-
-        <child>
-          <object class="GtkCheckButton" id="search_regex_toggle">
-            <property name="label" translatable="yes">Match by Regular Expression</property>
-          </object>
-        </child>
-      </object>
-    </child>
-  </object>
+  <menu id="search_settings_menu">
+    <item>
+      <attribute name="label" translatable="yes">Wrap Around</attribute>
+      <attribute name="role">check</attribute>
+      <attribute name="sensitive">true</attribute>
+      <attribute name="action">win.search.wrap-around</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Case Sensitive</attribute>
+      <attribute name="role">check</attribute>
+      <attribute name="sensitive">true</attribute>
+      <attribute name="action">win.search.case-sensitive</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">Match by Regular Expression</attribute>
+      <attribute name="role">check</attribute>
+      <attribute name="sensitive">true</attribute>
+      <attribute name="action">win.search.regex</attribute>
+    </item>
+  </menu>
 </interface>

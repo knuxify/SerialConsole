@@ -2,7 +2,7 @@
 Common utility functions.
 """
 
-from gi.repository import GObject
+from gi.repository import GObject, GLib, Gio
 
 
 def disallow_nonnumeric(entry, text, length, position, *args):
@@ -57,3 +57,41 @@ def copy_list_to_stringlist(target: list, model):
 
     for item in [i for i in target if i in added]:  # ensures order
         model.splice(target.index(item), 0, [item])
+
+
+class BoolPropertyAction(Gio.SimpleAction):
+    """Custom stateful action wrapper that binds to a boolean property."""
+    def __init__(self, name: str, source: GObject.Object, property: str):
+        super().__init__(
+            name=name,
+            parameter_type=None,
+            state=GLib.Variant.new_boolean(
+                source.get_property(property)
+            )
+        )
+        self._value_binding = self.bind_property(
+            "state_bool", source, property,
+            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE
+        )
+        self.connect("change-state", self.change_state)
+        self.connect("notify::state", lambda self, *a: self.notify("state-bool"))
+
+    def dispose(self):
+        try:
+            self._value_binding.unbind()
+            del self._value_binding
+        except AttributeError:
+            pass
+        super().dispose()
+
+    @GObject.Property(type=bool, default=False)
+    def state_bool(self):
+        """Current state as a boolean."""
+        return self.props.state.get_boolean()
+
+    @state_bool.setter
+    def state_bool(self, value: bool):
+        self.props.state = GLib.Variant.new_boolean(value)
+
+    def change_state(self, action: Gio.SimpleAction, value: GLib.Variant):
+        self.props.state = value

@@ -16,7 +16,7 @@ from .config import (
     from_enum_str,
     enum_to_stringlist,
 )
-from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist
+from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist, BoolPropertyAction
 from .serial import SerialHandler, SerialHandlerState
 from .terminal import SerialTerminal  # noqa: F401
 from .logger import SerialLogger, DEFAULT_LOG_FILENAME
@@ -46,10 +46,25 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
 
     search_bar = Gtk.Template.Child()
     search_entry = Gtk.Template.Child()
+    search_settings_button = Gtk.Template.Child()
+    search_settings_menu = Gtk.Template.Child()
+    search_next_button = Gtk.Template.Child()
+    search_previous_button = Gtk.Template.Child()
 
-    search_wrap_around_toggle = Gtk.Template.Child()
-    search_case_sensitive_toggle = Gtk.Template.Child()
-    search_regex_toggle = Gtk.Template.Child()
+    # Search properties
+
+    search_case_sensitive = GObject.Property(type=bool, default=False)
+    search_regex = GObject.Property(type=bool, default=False)
+
+    @GObject.Property(type=bool, default=True)
+    def search_wrap_around(self):
+        return self.terminal.search_get_wrap_around()
+
+    @search_wrap_around.setter
+    def search_wrap_around(self, search_wrap_around: bool):
+        return self.terminal.search_set_wrap_around(search_wrap_around)
+
+    # Search properties end
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,28 +87,17 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         self.terminal.search_set_wrap_around(True)
         self.prev_search_query: Optional[str] = None
 
-        search_cfg_toggles = {
-            "search-wrap-around": self.search_wrap_around_toggle,
-            "search-case-sensitive": self.search_case_sensitive_toggle,
-            "search-regex": self.search_regex_toggle,
-        }
+        for cfg in ("search-wrap-around", "search-case-sensitive", "search-regex"):
+            config.bind(cfg, self, cfg, flags=Gio.SettingsBindFlags.DEFAULT)
 
-        for search_cfg, search_cfg_toggle in search_cfg_toggles.items():
-            config.bind(
-                search_cfg,
-                search_cfg_toggle,
-                "active",
-                flags=Gio.SettingsBindFlags.DEFAULT,
-            )
+            # HACK: Properties installed with install_action/install_property_action
+            # are unusable in any of the action-name options of buttons, menus, etc.
+            # We have to use a custom class for the action to automate binding to a
+            # property.
+            action = BoolPropertyAction(cfg.replace("search-", "search."), self, cfg)
+            self.add_action(action)
 
-            self.bind_property(
-                search_cfg,
-                search_cfg_toggle,
-                "active",
-                GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
-            )
-
-            self.connect(f"notify::{search_cfg}", self.search_changed)
+            self.connect(f"notify::{cfg}", self.search_changed)
 
         # Set up serial handler
         self.serial = SerialHandler()
@@ -121,6 +125,13 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         self.connect("close-request", self.on_close)
 
         self.handle_state_change(self.serial)
+
+    def on_maximize_toggle(self, action, value):
+        action.set_value(value)
+        if value.get_boolean():
+            self.maximize()
+        else:
+            self.unmaximize()
 
     def on_close(self, *args):
         self.serial.close()
@@ -267,7 +278,10 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         flags = PCRE2_MULTILINE
 
         query = self.search_entry.get_text()
-        if self.props.search_case_sensitive:
+        self.search_next_button.props.sensitive = not not query
+        self.search_previous_button.props.sensitive = not not query
+
+        if not self.props.search_case_sensitive:
             query = query.lower()
             flags |= PCRE2_CASELESS
 
@@ -303,17 +317,6 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
     @Gtk.Template.Callback()
     def search_next(self, *args):
         self.terminal.search_find_next()
-
-    search_case_sensitive = GObject.Property(type=bool, default=False)
-    search_regex = GObject.Property(type=bool, default=False)
-
-    @GObject.Property(type=bool, default=True)
-    def search_wrap_around(self):
-        return self.terminal.search_get_wrap_around()
-
-    @search_wrap_around.setter
-    def search_wrap_around(self, search_wrap_around: bool):
-        return self.terminal.search_set_wrap_around(search_wrap_around)
 
 
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/settings-pane.ui")
@@ -474,7 +477,8 @@ class SerialConsoleSettingsPane(Gtk.Box):
             )
             selector.set_selected(config.get_enum(property))
             self.serial.connect(
-                "notify::" + property, lambda *args, prop=property: self.notify(prop + "-str")
+                "notify::" + property,
+                lambda *args, prop=property: self.notify(prop + "-str"),
             )
 
         # Set up baud rate selector
