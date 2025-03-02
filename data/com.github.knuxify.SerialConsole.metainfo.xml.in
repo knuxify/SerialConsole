@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
+  <!-- TRANSLATORS: This string is also used as the app name. -->
   <name>Serial Console</name>
   <!-- TRANSLATORS: App description. -->
   <summary>Access any serial console</summary>
@@ -25,6 +26,7 @@
 
   <releases>
     <release version="0.1.0" date="2022-07-31">
+      <!-- TRANSLATORS: 0.1.0 release description -->
       <description>Initial release.</description>
     </release>
   </releases>
