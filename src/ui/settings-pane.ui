@@ -198,6 +198,13 @@
                         <property name="title" translatable="yes">Write raw binary data</property>
                       </object>
                     </child>
+
+                    <child>
+                      <object class="AdwButtonRow">
+                        <property name="title" translatable="yes">View Log File</property>
+                        <signal name="activated" handler="open_log_file"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>

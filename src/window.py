@@ -633,5 +633,10 @@ class SerialConsoleSettingsPane(Gtk.Box):
         config["log-path"] = response.get_path()
 
     @Gtk.Template.Callback()
+    def open_log_file(self, *args):
+        """Opens the log file in the default text editor."""
+        Gio.AppInfo.launch_default_for_uri(GLib.filename_to_uri(config["log-path"]))
+
+    @Gtk.Template.Callback()
     def reset_console(self, *args):
         self.get_native().terminal.reset_activated()
