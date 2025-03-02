@@ -191,14 +191,20 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
             self.open_button_switcher.set_visible_child(self.open_button)
 
     def handle_error(self, serial, errno: int, message: str):
+        # TRANSLATORS: {msg} is a placeholder for the message, do not modify
+        # the string between the braces!
         error_message = _("A connection error has occured: {msg}").format(msg=message)
 
         if errno == 13:
             error_message = _(
+                # TRANSLATORS: {port} is a placeholder for the port name, do not modify
+                # the string between the braces!
                 'Permission denied for port {port}; make sure you\'re in the "tty" group'
             ).format(port=serial.port)
         elif errno == 16:
             error_message = _(
+                # TRANSLATORS: {port} is a placeholder for the port name, do not modify
+                # the string between the braces!
                 "Serial port {port} is busy; make sure no other application is using it"
             ).format(port=serial.port)
 
