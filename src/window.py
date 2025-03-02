@@ -47,9 +47,20 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
     search_bar = Gtk.Template.Child()
     search_entry = Gtk.Template.Child()
 
-    search_wrap_around_toggle = Gtk.Template.Child()
-    search_case_sensitive_toggle = Gtk.Template.Child()
-    search_regex_toggle = Gtk.Template.Child()
+    # Search properties
+
+    search_case_sensitive = GObject.Property(type=bool, default=False)
+    search_regex = GObject.Property(type=bool, default=False)
+
+    @GObject.Property(type=bool, default=True)
+    def search_wrap_around(self):
+        return self.terminal.search_get_wrap_around()
+
+    @search_wrap_around.setter
+    def search_wrap_around(self, search_wrap_around: bool):
+        return self.terminal.search_set_wrap_around(search_wrap_around)
+
+    # Search properties end
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,28 +83,31 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
         self.terminal.search_set_wrap_around(True)
         self.prev_search_query: Optional[str] = None
 
-        search_cfg_toggles = {
-            "search-wrap-around": self.search_wrap_around_toggle,
-            "search-case-sensitive": self.search_case_sensitive_toggle,
-            "search-regex": self.search_regex_toggle,
-        }
+        for cfg in ("search-wrap-around", "search-case-sensitive", "search-regex"):
+            config.bind(cfg, self, cfg, flags=Gio.SettingsBindFlags.DEFAULT)
 
-        for search_cfg, search_cfg_toggle in search_cfg_toggles.items():
-            config.bind(
-                search_cfg,
-                search_cfg_toggle,
-                "active",
-                flags=Gio.SettingsBindFlags.DEFAULT,
+            self.install_property_action(cfg.replace("search-", "search."), cfg)
+
+            """
+            action = Gio.SimpleAction.new_stateful(
+                cfg.replace("search-", "search."),
+                None,
+                GLib.Variant.new_boolean(self.get_property(cfg)),
             )
-
-            self.bind_property(
-                search_cfg,
-                search_cfg_toggle,
-                "active",
-                GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
+            action.connect(
+                "change-state",
+                lambda action, value, _cfg: self.set_property(_cfg, value),
+                cfg,
             )
+            self.add_action(action)
+            """
 
-            self.connect(f"notify::{search_cfg}", self.search_changed)
+            self.connect(f"notify::{cfg}", self.search_changed)
+
+        i = 0
+        while self.query_action(i)[0]:
+            print(self.query_action(i))
+            i += 1
 
         # Set up serial handler
         self.serial = SerialHandler()
@@ -304,17 +318,6 @@ class SerialConsoleWindow(Adw.ApplicationWindow):
     def search_next(self, *args):
         self.terminal.search_find_next()
 
-    search_case_sensitive = GObject.Property(type=bool, default=False)
-    search_regex = GObject.Property(type=bool, default=False)
-
-    @GObject.Property(type=bool, default=True)
-    def search_wrap_around(self):
-        return self.terminal.search_get_wrap_around()
-
-    @search_wrap_around.setter
-    def search_wrap_around(self, search_wrap_around: bool):
-        return self.terminal.search_set_wrap_around(search_wrap_around)
-
 
 @Gtk.Template(resource_path="/com/github/knuxify/SerialConsole/ui/settings-pane.ui")
 class SerialConsoleSettingsPane(Gtk.Box):
@@ -474,7 +477,8 @@ class SerialConsoleSettingsPane(Gtk.Box):
             )
             selector.set_selected(config.get_enum(property))
             self.serial.connect(
-                "notify::" + property, lambda *args, prop=property: self.notify(prop + "-str")
+                "notify::" + property,
+                lambda *args, prop=property: self.notify(prop + "-str"),
             )
 
         # Set up baud rate selector
