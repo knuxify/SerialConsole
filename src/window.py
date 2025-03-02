@@ -16,7 +16,12 @@ from .config import (
     from_enum_str,
     enum_to_stringlist,
 )
-from .common import disallow_nonnumeric, find_in_stringlist, copy_list_to_stringlist, BoolPropertyAction
+from .common import (
+    disallow_nonnumeric,
+    find_in_stringlist,
+    copy_list_to_stringlist,
+    BoolPropertyAction,
+)
 from .serial import SerialHandler, SerialHandlerState
 from .terminal import SerialTerminal  # noqa: F401
 from .logger import SerialLogger, DEFAULT_LOG_FILENAME

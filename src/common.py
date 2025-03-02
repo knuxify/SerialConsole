@@ -61,17 +61,18 @@ def copy_list_to_stringlist(target: list, model):
 
 class BoolPropertyAction(Gio.SimpleAction):
     """Custom stateful action wrapper that binds to a boolean property."""
+
     def __init__(self, name: str, source: GObject.Object, property: str):
         super().__init__(
             name=name,
             parameter_type=None,
-            state=GLib.Variant.new_boolean(
-                source.get_property(property)
-            )
+            state=GLib.Variant.new_boolean(source.get_property(property)),
         )
         self._value_binding = self.bind_property(
-            "state_bool", source, property,
-            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE
+            "state_bool",
+            source,
+            property,
+            GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE,
         )
         self.connect("change-state", self.change_state)
         self.connect("notify::state", lambda self, *a: self.notify("state-bool"))
