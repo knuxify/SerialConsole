@@ -1,0 +1,17 @@
+# Translator credits
+src/main.py
+
+# App metadata
+data/com.github.knuxify.SerialConsole.metainfo.xml.in
+data/com.github.knuxify.SerialConsole.desktop.in
+
+# Window
+src/ui/window.ui
+src/window.py
+
+# Settings
+src/ui/settings-pane.ui
+src/config.py
+
+# Logger (default log filename)
+src/logger.py

@@ -7,6 +7,7 @@ from enum import IntEnum
 
 config = Gio.Settings.new("com.github.knuxify.SerialConsole")
 enums = {}
+enum_names = {}
 
 # GSettings enum handlers
 
@@ -47,8 +48,35 @@ def enum_to_stringlist(enum):
     Takes an enum generated with get_enum_for_key and returns
     a GtkStringList containing its items.
     """
-    return Gtk.StringList.new(enums[enum])
+    return Gtk.StringList.new(list(enum_names[enum].values()))
 
 
 Parity = get_enum_for_key("parity", "Parity")
 FlowControl = get_enum_for_key("flow-control", "FlowControl")
+
+# Translatable names for config enums. GSchema files do not allow for
+# translating the nick values, so we have to specify them manually here
+# so that they're picked up during .pot file generation.
+
+enum_names[Parity] = {
+    # TRANSLATORS: Value for empty parity/flow control setting
+    Parity.NONE: _("None"),
+    # TRANSLATORS: Parity setting
+    Parity.EVEN: _("Even"),
+    # TRANSLATORS: Parity setting
+    Parity.ODD: _("Odd"),
+    # TRANSLATORS: Parity setting
+    Parity.SPACE: _("Space"),
+    # TRANSLATORS: Parity setting
+    Parity.MARK: _("Mark"),
+}
+
+enum_names[FlowControl] = {
+    FlowControl.NONE: _("None"),
+    # TRANSLATORS: Flow control setting
+    FlowControl.HARDWARE_RTS_CTS: _("Hardware (RTS/CTS)"),
+    # TRANSLATORS: Flow control setting
+    FlowControl.HARDWARE_DSR_DTR: _("Hardware (DSR/DTR)"),
+    # TRANSLATORS: Flow control setting
+    FlowControl.SOFTWARE: _("Software"),
+}

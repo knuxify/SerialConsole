@@ -35,7 +35,7 @@
                       <object class="GtkStack" id="open_button_switcher">
                         <child>
                           <object class="GtkButton" id="open_button">
-                            <property name="label" translatable="yes">Connect</property>
+                            <property name="label" translatable="yes" context="Connect/Disconnect button">Connect</property>
                             <style><class name="suggested-action"/></style>
                             <signal name="clicked" handler="open_serial"/>
                             <property name="halign">start</property>
@@ -44,7 +44,7 @@
 
                         <child>
                           <object class="GtkButton" id="close_button">
-                            <property name="label" translatable="yes">Disconnect</property>
+                            <property name="label" translatable="yes" context="Connect/Disconnect button">Disconnect</property>
                             <style><class name="destructive-action"/></style>
                             <signal name="clicked" handler="close_serial"/>
                             <property name="halign">start</property>
@@ -141,7 +141,7 @@
 
                                 <child>
                                   <object class="GtkSearchEntry" id="search_entry">
-                                    <property name="placeholder-text" translatable="yes">Find text</property>
+                                    <property name="placeholder-text" translatable="yes" context="Search bar">Find text</property>
                                     <property name="hexpand">true</property>
                                     <signal name="search-changed" handler="search_changed"/>
                                     <signal name="next-match" handler="search_next"/>
@@ -152,7 +152,7 @@
                                 <child>
                                   <object class="GtkMenuButton" id="search_settings_button">
                                     <property name="icon-name">view-more-symbolic</property>
-                                    <property name="tooltip-text" translatable="yes">Search Options…</property>
+                                    <property name="tooltip-text" translatable="yes" context="Search bar">Search Options…</property>
                                     <property name="menu-model">search_settings_menu</property>
                                   </object>
                                 </child>
@@ -162,7 +162,7 @@
                             <child>
                               <object class="GtkButton" id="search_previous_button">
                                 <property name="icon-name">go-up-symbolic</property>
-                                <property name="tooltip-text" translatable="yes">Previous Match</property>
+                                <property name="tooltip-text" translatable="yes" context="Search bar">Previous Match</property>
                                 <property name="sensitive">false</property>
                                 <signal name="clicked" handler="search_previous"/>
                               </object>
@@ -171,7 +171,7 @@
                             <child>
                               <object class="GtkButton" id="search_next_button">
                                 <property name="icon-name">go-down-symbolic</property>
-                                <property name="tooltip-text" translatable="yes">Next Match</property>
+                                <property name="tooltip-text" translatable="yes" context="Search bar">Next Match</property>
                                 <property name="sensitive">false</property>
                                 <signal name="clicked" handler="search_next"/>
                               </object>
@@ -215,11 +215,11 @@
   <menu id="primary_menu">
     <section>
       <item>
-        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="label" translatable="yes" context="Menu options">_Keyboard Shortcuts</attribute>
         <attribute name="action">win.show-help-overlay</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="label" translatable="yes" context="Menu options">_About</attribute>
         <attribute name="action">app.about</attribute>
       </item>
     </section>
@@ -227,19 +227,19 @@
 
   <menu id="search_settings_menu">
     <item>
-      <attribute name="label" translatable="yes">Wrap Around</attribute>
+      <attribute name="label" translatable="yes" context="Search bar: settings">Wrap Around</attribute>
       <attribute name="role">check</attribute>
       <attribute name="sensitive">true</attribute>
       <attribute name="action">win.search.wrap-around</attribute>
     </item>
     <item>
-      <attribute name="label" translatable="yes">Case Sensitive</attribute>
+      <attribute name="label" translatable="yes" context="Search bar: settings">Case Sensitive</attribute>
       <attribute name="role">check</attribute>
       <attribute name="sensitive">true</attribute>
       <attribute name="action">win.search.case-sensitive</attribute>
     </item>
     <item>
-      <attribute name="label" translatable="yes">Match by Regular Expression</attribute>
+      <attribute name="label" translatable="yes" context="Search bar: settings">Match by Regular Expression</attribute>
       <attribute name="role">check</attribute>
       <attribute name="sensitive">true</attribute>
       <attribute name="action">win.search.regex</attribute>
