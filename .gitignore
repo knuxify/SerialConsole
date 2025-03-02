@@ -19,3 +19,7 @@ _example-notags-fortest.*
 _test_*example.*
 
 *.mo
+
+.ruff_cache/
+
+.flatpak-builder/
